@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>施工金額計算</title>
+<style>
+body { font-family: Arial; padding: 20px; }
+input, button {
+  width: 100%;
+  padding: 10px;
+  margin: 6px 0;
+  font-size: 16px;
+}
+button {
+  background: #2c7;
+  border: none;
+  color: white;
+}
+.result {
+  margin-top: 15px;
+  background: #f3f3f3;
+  padding: 10px;
+}
+</style>
+</head>
+<body>
+
+<h2>施工紀錄輸入</h2>
+
+<input type="date" id="date">
+<input type="text" id="location" placeholder="施工地點">
+<input type="number" id="length" placeholder="長度 (m)">
+<input type="number" id="width" placeholder="寬度 (m)">
+<input type="number" id="unit_price" placeholder="單價">
+
+<button onclick="submitData()">計算並儲存</button>
+
+<div class="result" id="result"></div>
+
+<script>
+function submitData() {
+  fetch("/calc", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      date: date.value,
+      location: location.value,
+      length: length.value,
+      width: width.value,
+      unit_price: unit_price.value
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    result.innerHTML = `
+      面積：${data.area} m²<br>
+      金額：${data.amount} 元
+    `;
+  });
+}
+</script>
+
+</body>
+</html>
