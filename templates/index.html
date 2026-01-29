@@ -1,64 +1,137 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>施工金額計算</title>
-<style>
-body { font-family: Arial; padding: 20px; }
-input, button {
-  width: 100%;
-  padding: 10px;
-  margin: 6px 0;
-  font-size: 16px;
-}
-button {
-  background: #2c7;
-  border: none;
-  color: white;
-}
-.result {
-  margin-top: 15px;
-  background: #f3f3f3;
-  padding: 10px;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DesignHelper Web - 通報單產生器</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; padding-top: 50px; }
+        .form-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .section-title { border-left: 5px solid #0d6efd; padding-left: 10px; margin-bottom: 20px; color: #333; }
+    </style>
 </head>
 <body>
 
-<h2>施工紀錄輸入</h2>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 form-container">
+            <h2 class="text-center mb-4">📝 通報單基本資料輸入</h2>
+            <hr>
 
-<input type="date" id="date">
-<input type="text" id="location" placeholder="施工地點">
-<input type="number" id="length" placeholder="長度 (m)">
-<input type="number" id="width" placeholder="寬度 (m)">
-<input type="number" id="unit_price" placeholder="單價">
+            <form id="noticeForm">
+                <div class="section-title"><h5>基本資訊</h5></div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">通報單編號 (Notice No.)</label>
+                        <input type="text" class="form-control" id="noticeNo" placeholder="例如：112001" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">測量人員</label>
+                        <select class="form-select" id="surveyStaff">
+                            <option value="庭瑋">庭瑋</option>
+                            <option value="經理">經理</option>
+                            <option value="小左">小左</option>
+                            <option value="煜璿">煜璿</option>
+                            <option value="雅萱">雅萱</option>
+                            <option value="阿嘎">阿嘎</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">施工地點 (Position)</label>
+                        <input type="text" class="form-control" id="workingPosition" placeholder="請輸入詳細地址或路段" required>
+                    </div>
+                </div>
 
-<button onclick="submitData()">計算並儲存</button>
+                <div class="section-title"><h5>日期設定</h5></div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label">勘查日期</label>
+                        <input type="date" class="form-control" id="surveyDate">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">預定開工日</label>
+                        <input type="date" class="form-control" id="startDate">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">報完工日期</label>
+                        <input type="date" class="form-control" id="submitDay">
+                    </div>
+                </div>
 
-<div class="result" id="result"></div>
+                <div class="section-title"><h5>類型與合約</h5></div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label">案件類型</label>
+                        <div class="mt-2">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="caseType" id="typeEmergency" value="搶修案" checked>
+                                <label class="form-check-label" for="typeEmergency">搶修案</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="caseType" id="typeNormal" value="一般案">
+                                <label class="form-check-label" for="typeNormal">一般案</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">合約類別</label>
+                        <select class="form-select" id="contractTxt">
+                            <option value="北搶">北搶</option>
+                            <option value="中松">中松</option>
+                            <option value="士大">士大</option>
+                            <option value="北投">北投</option>
+                            <option value="全市搶">全市搶</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">預計工期 (日曆天)</label>
+                        <input type="number" class="form-control" id="expectDate" value="7">
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-primary btn-lg" onclick="submitData()">產生 JSON 檔案</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <script>
-function submitData() {
-  fetch("/calc", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      date: date.value,
-      location: location.value,
-      length: length.value,
-      width: width.value,
-      unit_price: unit_price.value
-    })
-  })
-  .then(res => res.json())
-  .then(data => {
-    result.innerHTML = `
-      面積：${data.area} m²<br>
-      金額：${data.amount} 元
-    `;
-  });
-}
+    async function submitData() {
+      const payload = {
+          surveyDate: document.getElementById('surveyDate').value,
+          startDate: document.getElementById('startDate').value,
+          expectDate: document.getElementById('expectDate').value,
+          submitDay: document.getElementById('submitDay').value,
+          caseType: document.querySelector('input[name="caseType"]:checked').value,
+          workingPosition: document.getElementById('workingPosition').value,
+          noticeNo: document.getElementById('noticeNo').value,
+          surveyStaff: document.getElementById('surveyStaff').value,
+          contractTxt: document.getElementById('contractTxt').value
+      };
+
+      // 發送到 Flask API
+      const response = await fetch('/api/save_json', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+
+      if (result.status === "success") {
+          // 在客戶端觸發下載
+          const blob = new Blob([result.json_str], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Json_Output_${payload.noticeNo}.json`;
+          a.click();
+          alert("JSON 資料處理完成並已下載！");
+      }
+  }
 </script>
 
 </body>
