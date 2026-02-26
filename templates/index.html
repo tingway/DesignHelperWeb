@@ -1,138 +1,544 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DesignHelper Web - 通報單產生器</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f8f9fa; padding-top: 50px; }
-        .form-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .section-title { border-left: 5px solid #0d6efd; padding-left: 10px; margin-bottom: 20px; color: #333; }
+        body { background-color: #f1f3f5; font-family: "Microsoft JhengHei", sans-serif; }
+        .case-header { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        /* 設定左右兩欄等高或滾動 */
+        .main-content { height: calc(100vh - 250px); overflow: hidden; }
+        .scroll-column { height: 100%; overflow-y: auto; padding-right: 5px; }
+        .card { border-radius: 10px; margin-bottom: 15px; }
+        .tab-content { padding: 15px; border: 1px solid #dee2e6; border-top: none; background: white; }
+        .table-sm { font-size: 0.85rem; }
+        .sticky-footer { background: #fff; padding: 10px; border-top: 1px solid #ddd; position: fixed; bottom: 0; width: 100%; left: 0; }
     </style>
 </head>
+
 <body>
 
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-lg-8 form-container">
-            <h2 class="text-center mb-4">📝 通報單基本資料輸入</h2>
-            <hr>
+<div class="container-fluid px-4">
+    <div class="case-header mt-3">
+        <div class="row g-2">
+            <div class="col-md-1"><label class="form-label small">會勘日期</label><input type="date" class="form-control form-control-sm" id="surveyDate"></div>
+            <div class="col-md-1"><label class="form-label small">開工日期</label><input type="date" class="form-control form-control-sm" id="startDate"></div>
+            <div class="col-md-1"><label class="form-label small">繳交日期</label><input type="date" class="form-control form-control-sm" id="submitDay"></div>
+            <div class="col-md-1"><label class="form-label small">工期</label><input type="number" class="form-control form-control-sm" id="expectDate" value="7" placeholder="日曆天"></div>
+            <div class="col-md-1">
+                <label class="form-label small">會勘人員</label>
+                <select class="form-select form-select-sm" id="district">
+                    <option value="經理">經理</option><option value="小左">小左</option><option value="煜璿">煜璿</option><option value="雅萱">雅萱</option><option value="阿嘎">阿嘎</option><option value="庭瑋">庭瑋</option>
+                </select>
+            </div>
+        </div>
+        <div class="row g-2 mt-1">
+            <div class="col-md-1">
+                <label class="form-label small">案件類型</label>
+                <select class="form-select form-select-sm" id="caseType">
+                    <option value="搶修案">搶修案</option><option value="一般案">一般案</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <label class="form-label small">行政區(合約類別)</label>
+                <select class="form-select form-select-sm" id="contractTxt">
+                    <option value="北搶">北搶</option><option value="中松">中山松山</option><option value="士大">士林大同</option><option value="北投">北投</option><option value="全市搶">全市搶修</option>
+                </select>
+            </div>
+            <div class="col-md-1"><label class="form-label small">通報編號</label><input type="text" class="form-control form-control-sm" id="noticeNo" placeholder="第幾次"></div>
+            <div class="col-md-4"><label class="form-label small">施工地點</label><input type="text" class="form-control form-control-sm" id="workingPosition"></div>
+            <div class="col-md-1">
+                <label class="form-label small">地形圖編號</label>
+                <input type="text" class="form-control form-control-sm" id="mapNum" placeholder="N">
+            </div>
+        </div>
+    </div>
+    <div class="row main-content">
+        <div class="col-md-5 scroll-column">
+            <ul class="nav nav-tabs" id="workTabs">
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#mainTab">主要構造物</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#coverTab">頂板</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#recoverTab">復舊</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#othersTab">其他</button></li>
+            </ul>
+            <div class="tab-content shadow-sm rounded-bottom">
+                <div class="tab-pane fade show active" id="mainTab">
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <label class="form-label small">構造物型式</label>
+                            <select class="form-select form-select-sm" id="m_structureType">
+                                <option value="側溝">側溝</option>
+                                <option value="集水井">集水井</option>
+                                <option value="暗溝">暗溝</option>
+                                <option value="鋼筋混凝土管">鋼筋混凝土管</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">多項編號 (multipleNO)</label>
+                            <input type="text" class="form-control form-control-sm" id="m_multipleNO">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">施工類型 (workType)</label>
+                            <select class="form-select form-select-sm" id="m_workType">
+                                <option value="更新">更新</option>
+                                <option value="新設">新設</option>
+                            </select>
+                        </div>
 
-            <form id="noticeForm">
-                <div class="section-title"><h5>基本資訊</h5></div>
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <label class="form-label">通報單編號 (Notice No.)</label>
-                        <input type="text" class="form-control" id="noticeNo" placeholder="例如：112001" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">測量人員</label>
-                        <select class="form-select" id="surveyStaff">
-                            <option value="庭瑋">庭瑋</option>
-                            <option value="經理">經理</option>
-                            <option value="小左">小左</option>
-                            <option value="煜璿">煜璿</option>
-                            <option value="雅萱">雅萱</option>
-                            <option value="阿嘎">阿嘎</option>
-                        </select>
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">施工地點 (Position)</label>
-                        <input type="text" class="form-control" id="workingPosition" placeholder="請輸入詳細地址或路段" required>
-                    </div>
-                </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">既有型式 (oldType)</label>
+                            <select class="form-select form-select-sm" id="m_oldType">
+                                <option value="無既有設施">無既有設施</option>
+                                <option value="矩形溝">矩形溝</option>
+                                <option value="U型溝">U型溝</option>
+                                <option value="既有井">既有井</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">外模 (outerFrame)</label>
+                            <select class="form-select form-select-sm" id="m_outerFrame">
+                                <option value="無">無</option>
+                                <option value="有">有</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small">施作長度 (Length) m</label>
+                            <input type="number" class="form-control form-control-sm" id="m_Length">
+                        </div>
 
-                <div class="section-title"><h5>日期設定</h5></div>
-                <div class="row g-3 mb-4">
-                    <div class="col-md-4">
-                        <label class="form-label">勘查日期</label>
-                        <input type="date" class="form-control" id="surveyDate">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">預定開工日</label>
-                        <input type="date" class="form-control" id="startDate">
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">報完工日期</label>
-                        <input type="date" class="form-control" id="submitDay">
-                    </div>
-                </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">淨寬 (Width) cm</label>
+                            <input type="number" class="form-control form-control-sm" id="m_Width" value="40">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">淨深 (Depth) cm</label>
+                            <input type="number" class="form-control form-control-sm" id="m_Depth" value="40">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">壁厚 (WallThick) cm</label>
+                            <input type="number" class="form-control form-control-sm" id="m_WallThick" value="20">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small">深度範圍 (depthRange)</label>
+                            <input type="text" class="form-control form-control-sm" id="m_depthRange" placeholder="例如: 40~50">
+                        </div>
 
-                <div class="section-title"><h5>類型與合約</h5></div>
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <label class="form-label">案件類型</label>
-                        <div class="mt-2">
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="caseType" id="typeEmergency" value="搶修案" checked>
-                                <label class="form-check-label" for="typeEmergency">搶修案</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="caseType" id="typeNormal" value="一般案">
-                                <label class="form-check-label" for="typeNormal">一般案</label>
-                            </div>
+                        <div class="col-md-4 text-muted border-top mt-2 pt-2">
+                            <label class="form-label small">既有淨寬 cm</label>
+                            <input type="number" class="form-control form-control-sm" id="m_oldWidth">
+                        </div>
+                        <div class="col-md-4 text-muted border-top mt-2 pt-2">
+                            <label class="form-label small">既有淨深 cm</label>
+                            <input type="number" class="form-control form-control-sm" id="m_oldDepth">
+                        </div>
+                        <div class="col-md-4 text-muted border-top mt-2 pt-2">
+                            <label class="form-label small">既有壁厚 cm</label>
+                            <input type="number" class="form-control form-control-sm" id="m_oldWallThick">
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">合約類別</label>
-                        <select class="form-select" id="contractTxt">
-                            <option value="北搶">北搶</option>
-                            <option value="中松">中松</option>
-                            <option value="士大">士大</option>
-                            <option value="北投">北投</option>
-                            <option value="全市搶">全市搶</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">預計工期 (日曆天)</label>
-                        <input type="number" class="form-control" id="expectDate" value="7">
+                    <div class="mt-3">
+                        <button class="btn btn-primary w-100" onclick="calculateAPI('main')">計算並預覽並加入工項</button>
                     </div>
                 </div>
 
-                <div class="d-grid gap-2">
-                    <button type="button" class="btn btn-primary btn-lg" onclick="submitData()">產生 JSON 檔案</button>
+                <div class="tab-pane fade" id="coverTab">
+                    <div class="row g-2">
+                        <div class="col-md-4"><label class="form-label small">構造物型式</label>
+                            <select class="form-select form-select-sm" id="c_structureType">
+                                <option value="側溝頂板">側溝頂板</option><option value="集水井頂板">集水井頂板</option><option value="暗溝頂板">暗溝頂板</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4"><label class="form-label small">多項編號</label><input type="text" class="form-control form-control-sm" id="c_multipleNO"></div>
+                        <div class="col-md-4"><label class="form-label small">施工類型</label>
+                            <select class="form-select form-select-sm" id="c_workType"><option value="更新">更新</option><option value="新設">新設</option></select>
+                        </div>
+                        <div class="col-md-4"><label class="form-label small">頂板型式</label>
+                            <select class="form-select form-select-sm" id="c_coverType"><option value="S1">S1</option><option value="S2">S2</option><option value="L1">L1</option><option value="L2">L2</option></select>
+                        </div>
+                        <div class="col-md-4"><label class="form-label small">施作長度 m</label><input type="number" class="form-control form-control-sm" id="c_Length" value="1"></div>
+                        <div class="col-md-4"><label class="form-label small">頂板寬 cm</label><input type="number" class="form-control form-control-sm" id="c_coverWidth" value="80"></div>
+                        <div class="col-md-4"><label class="form-label small">頂板厚</label>
+                            <select class="form-select form-select-sm" id="c_coverThick"><option value="13cm">13cm</option><option value="15cm">15cm</option></select>
+                        </div>
+                        <div class="col-md-4"><label class="form-label small">格柵寬</label>
+                            <select class="form-select form-select-sm" id="c_grilleWidth"><option value="45cm">45cm</option><option value="55cm">55cm</option><option value="65cm">65cm</option></select>
+                        </div>
+                        <div class="col-md-4"><label class="form-label small">格柵形式</label>
+                            <select class="form-select form-select-sm" id="c_grilleType"><option value="一般型">一般型</option><option value="細目型">細目型</option></select>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-primary w-100" onclick="calculateAPI('cover')">計算並預覽並加入工項</button>
+                    </div>
                 </div>
-            </form>
+
+                <div class="tab-pane fade" id="recoverTab">
+                    <div class="row g-2">
+                        <div class="col-md-4"><label class="form-label small">復舊方式</label>
+                            <select class="form-select form-select-sm" id="r_recoverType">
+                                <option value="路面切割">路面切割</option><option value="道路銑鋪">道路銑鋪</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4"><label class="form-label small">復舊用料</label>
+                            <select class="form-select form-select-sm" id="r_materialType">
+                                <option value="AC回填">AC回填</option><option value="樹脂混凝土">樹脂混凝土</option>
+                                <option value="一般瀝青">一般瀝青</option><option value="再生瀝青">再生瀝青</option><option value="改質瀝青">改質瀝青</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4"><label class="form-label small">厚度</label>
+                            <select class="form-select form-select-sm" id="r_Thick"><option value="13cm">13cm</option><option value="15cm">15cm</option><option value="5cm">5cm</option><option value="10cm">10cm</option></select>
+                        </div>
+                        <div class="col-md-4"><label class="form-label small">施作長度 m</label><input type="text" class="form-control form-control-sm" id="r_Length" value="1" placeholder="可填算式"></div>
+                        <div class="col-md-4"><label class="form-label small">切割寬度 cm</label><input type="number" class="form-control form-control-sm" id="r_Width" value="10"></div>
+                        <div class="col-md-4"><label class="form-label small">色彩舖面 (算式)</label><input type="text" class="form-control form-control-sm" id="r_colorCover" placeholder="選填"></div>
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-primary w-100" onclick="calculateAPI('recover')">計算並預覽並加入工項</button>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="othersTab">
+                    <div class="row g-2 small">
+                        <div class="col-6 col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" id="o_cuttingAC"><label class="form-check-label">切割瀝青混凝土(㎡)</label></div><input type="text" class="form-control form-control-sm" id="o_cuttingAC_val" placeholder="算式" disabled></div>
+                        <div class="col-6 col-md-4"><div class="form-check" title="1.421"><input class="form-check-input" type="checkbox" id="o_camera" checked><label class="form-check-label">攝影機(日/台)</label></div><input type="text" class="form-control form-control-sm" id="o_camera_val" value="7" disabled></div>
+                        <div class="col-6 col-md-4"><div class="form-check" title="1.429"><input class="form-check-input" type="checkbox" id="o_trafficCtrl" checked><label class="form-check-label">義交編列(時)</label></div><input type="text" class="form-control form-control-sm" id="o_trafficCtrl_val" value="1" disabled></div>
+                        <div class="col-6 col-md-4"><div class="form-check" title="1.4"><input class="form-check-input" type="checkbox" id="o_supportLabor" checked><label class="form-check-label">配合技術之勞工(時)</label></div><input type="text" class="form-control form-control-sm" id="o_supportLabor_val" value="8*3" disabled></div>
+                        <div class="col-6 col-md-4"><div class="form-check" title="1.432"><input class="form-check-input" type="checkbox" id="o_sectionalSteelFens"><label class="form-check-label">型鋼護欄(m)</label></div><input type="text" class="form-control form-control-sm" id="o_sectionalSteelFens_val" disabled></div>
+                        <div class="col-6 col-md-4"><div class="form-check" title="1.433"><input class="form-check-input" type="checkbox" id="o_channelSteelFens"><label class="form-check-label">槽鋼護欄(m)</label></div><input type="text" class="form-control form-control-sm" id="o_channelSteelFens_val" disabled></div>
+                        <div class="col-6 col-md-4"><div class="form-check" title="1.11"><input class="form-check-input" type="checkbox" id="o_sprinklerTruck" checked><label class="form-check-label">洒水車(時)</label></div><input type="text" class="form-control form-control-sm" id="o_sprinklerTruck_val" value="4" disabled></div>
+                        <div class="col-6 col-md-4"><div class="form-check" title="1.3"><input class="form-check-input" type="checkbox" id="o_truckDriver" checked><label class="form-check-label">駕駛小貨車(時)</label></div><input type="text" class="form-control form-control-sm" id="o_truckDriver_val" value="4" disabled></div>
+                        <div class="col-6 col-md-4"><div class="form-check" title="1.16"><input class="form-check-input" type="checkbox" id="o_craneTruck" checked><label class="form-check-label">吊卡車(時)</label></div><input type="text" class="form-control form-control-sm" id="o_craneTruck_val" value="4" disabled></div>
+                        <div class="col-6 col-md-4"><div class="form-check" title="1.19"><input class="form-check-input" type="checkbox" id="o_wheelLoaderTruck" checked><label class="form-check-label">輪式裝載車(時)</label></div><input type="text" class="form-control form-control-sm" id="o_wheelLoaderTruck_val" value="4" disabled></div>
+                        <div class="col-6 col-md-4"><div class="form-check" title="1.1"><input class="form-check-input" type="checkbox" id="o_heavyMachineDriver" checked><label class="form-check-label">操作手重機械(時)</label></div><input type="text" class="form-control form-control-sm" id="o_heavyMachineDriver_val" value="4+4" disabled></div>
+                        <div class="col-6 col-md-4"><div class="form-check" title="1.396"><input class="form-check-input" type="checkbox" id="o_emergencyRepair" checked><label class="form-check-label">緊急搶修路面開挖(處)</label></div><input type="text" class="form-control form-control-sm" id="o_emergencyRepair_val" value="1" disabled></div>
+                        <div class="col-6 col-md-4"><div class="form-check" title="1.364/1.366"><input class="form-check-input" type="checkbox" id="o_pump" checked><label class="form-check-label">抽水機(時)</label></div><input type="text" class="form-control form-control-sm" id="o_pump_val" value="7" disabled></div>
+                        <div class="col-6 col-md-4"><div class="form-check" title="1.366"><input class="form-check-input" type="checkbox" id="o_sandBag"><label class="form-check-label">圍水砂包(㎡)</label></div><input type="text" class="form-control form-control-sm" id="o_sandBag_val" disabled></div>
+                        <div class="col-6 col-md-4"><div class="form-check" title="1.421"><input class="form-check-input" type="checkbox" id="o_surveying" checked><label class="form-check-label">施工測量(次)</label></div><input type="text" class="form-control form-control-sm" id="o_surveying_val" value="1" disabled></div>
+                        <div class="col-6 col-md-4"><div class="form-check" title="1.433"><input class="form-check-input" type="checkbox" id="o_humanSteelPlate" checked><label class="form-check-label">人行跨越鋼板(組)</label></div><input type="text" class="form-control form-control-sm" id="o_humanSteelPlate_val" value="1" disabled></div>
+                        <div class="col-6 col-md-4"><div class="form-check" title="1.333/1.335"><input class="form-check-input" type="checkbox" id="o_tempSteelPlate"><label class="form-check-label">臨時覆蓋鋼板(㎡)</label></div><input type="text" class="form-control form-control-sm" id="o_tempSteelPlate_val" disabled></div>
+                        <div class="col-6 col-md-4"><div class="form-check" title="1.387"><input class="form-check-input" type="checkbox" id="o_smallMachine" checked><label class="form-check-label">臨時設施小型機具(次)</label></div><input type="text" class="form-control form-control-sm" id="o_smallMachine_val" value="1" disabled></div>
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-primary w-100" onclick="calculateAPI('others')">計算並預覽並加入工項</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7 scroll-column">
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-secondary text-white py-1 d-flex justify-content-between align-items-center">
+                    <span>已暫存工項清單</span>
+                    <div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-light btn-sm" onclick="moveUpItem()">前移</button>
+                        <button type="button" class="btn btn-light btn-sm" onclick="deleteSelectedItem()">刪除</button>
+                        <button type="button" class="btn btn-light btn-sm" onclick="clearWorkItems()">清除</button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover table-sm mb-0">
+                        <thead class="table-light">
+                            <tr><th width="30"></th><th>工項名稱</th><th>數量</th><th>單位</th><th>操作</th></tr>
+                        </thead>
+                        <tbody id="workItemsTableBody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white py-1">計算明細 (預覽)</div>
+                <div class="card-body p-0">
+                    <table class="table table-bordered table-sm mb-0">
+                        <thead class="table-light">
+                            <tr><th>編號</th><th>項目</th><th>=</th><th>數值</th><th>單位</th></tr>
+                        </thead>
+                        <tbody id="calcDetailBody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="sticky-footer d-flex justify-content-between align-items-center shadow-sm px-4">
+        <div class="d-flex align-items-center">
+            <span class="me-2 fw-bold text-secondary" style="white-space: nowrap;">工項輸入過程:</span>
+            <button class="btn btn-outline-secondary btn-sm me-2" onclick="saveToLocalStorage()">
+                <i class="bi bi-save"></i> 暫存 (Save)
+            </button>
+            <button class="btn btn-outline-secondary btn-sm" onclick="loadFromLocalStorage()">
+                <i class="bi bi-folder2-open"></i> 匯入 (Load)
+            </button>
+        </div>
+
+        <div class="d-flex align-items-center">
+            <span class="me-3 text-muted small d-none d-md-inline">所有工項完成後請導出 JSON</span>
+            <button class="btn btn-dark btn-lg" onclick="downloadFinalJson()">
+                💾 導出最終 JSON 檔
+            </button>
         </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    async function submitData() {
-      const payload = {
-          surveyDate: document.getElementById('surveyDate').value,
-          startDate: document.getElementById('startDate').value,
-          expectDate: document.getElementById('expectDate').value,
-          submitDay: document.getElementById('submitDay').value,
-          caseType: document.querySelector('input[name="caseType"]:checked').value,
-          workingPosition: document.getElementById('workingPosition').value,
-          noticeNo: document.getElementById('noticeNo').value,
-          surveyStaff: document.getElementById('surveyStaff').value,
-          contractTxt: document.getElementById('contractTxt').value
-      };
+    let workItemsList = [];  // [{ workItemType, workItem, detailRows, name, qty, unit }]
+    let currentPreviewData = null;
+    let currentWorkItemType = null;
+    let currentWorkItemPayload = null;
+    let selectedRowIndex = -1;
 
-      // 發送到 Flask API
-      const response = await fetch('/api/save_json', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-      });
+    const OTHERS_IDS = { o_cuttingAC:'1.97', o_camera:'1.421', o_trafficCtrl:'1.429', o_supportLabor:'1.4', o_sectionalSteelFens:'1.432', o_channelSteelFens:'1.433', o_sprinklerTruck:'1.11', o_truckDriver:'1.3', o_craneTruck:'1.16', o_wheelLoaderTruck:'1.19', o_heavyMachineDriver:'1.1', o_emergencyRepair:'1.396', o_pump:'1.364', o_sandBag:'1.366', o_surveying:'1.421', o_humanSteelPlate:'1.432', o_tempSteelPlate:'1.333', o_smallMachine:'1.387' };
 
-      const result = await response.json();
+    document.querySelectorAll('#othersTab .form-check-input[type="checkbox"]').forEach(el => {
+        const valId = el.id + '_val';
+        const valEl = document.getElementById(valId);
+        if (valEl) { valEl.disabled = !el.checked; el.addEventListener('change', function(){ document.getElementById(valId).disabled = !this.checked; }); }
+    });
 
-      if (result.status === "success") {
-          // 在客戶端觸發下載
-          const blob = new Blob([result.json_str], { type: "application/json" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `Json_Output_${payload.noticeNo}.json`;
-          a.click();
-          alert("JSON 資料處理完成並已下載！");
-      }
-  }
+    function getCaseType() { return document.getElementById('caseType').value; }
+
+    function buildMainWorkItem() {
+        return {
+            workItemType: "Main Sturcture",
+            structureType: document.getElementById('m_structureType').value,
+            caseType: getCaseType(),
+            multipleNO: document.getElementById('m_multipleNO').value,
+            workType: document.getElementById('m_workType').value,
+            oldType: document.getElementById('m_oldType').value,
+            outerFrame: document.getElementById('m_outerFrame').value,
+            Length: document.getElementById('m_Length').value,
+            WallThick: document.getElementById('m_WallThick').value,
+            Width: document.getElementById('m_Width').value,
+            WidthName: "淨寬",
+            Depth: document.getElementById('m_Depth').value,
+            depthRange: document.getElementById('m_depthRange').value,
+            depthName: "平均深",
+            oldWidth: document.getElementById('m_oldWidth').value,
+            oldDepth: document.getElementById('m_oldDepth').value,
+            oldWallThick: document.getElementById('m_oldWallThick').value,
+            colorCover: ""
+        };
+    }
+    function buildCoverWorkItem() {
+        return {
+            workItemType: "Cover Sturcture",
+            structureType: document.getElementById('c_structureType').value,
+            caseType: getCaseType(),
+            multipleNO: document.getElementById('c_multipleNO').value,
+            workType: document.getElementById('c_workType').value,
+            coverType: document.getElementById('c_coverType').value,
+            Length: document.getElementById('c_Length').value,
+            coverWidth: document.getElementById('c_coverWidth').value,
+            coverThick: document.getElementById('c_coverThick').value,
+            grilleWidth: document.getElementById('c_grilleWidth').value,
+            grilleType: document.getElementById('c_grilleType').value
+        };
+    }
+    function buildRecoverWorkItem() {
+        return {
+            workItemType: "Recover",
+            caseType: getCaseType(),
+            recoverType: document.getElementById('r_recoverType').value,
+            materialType: document.getElementById('r_materialType').value,
+            Thick: document.getElementById('r_Thick').value,
+            Length: document.getElementById('r_Length').value,
+            Width: document.getElementById('r_Width').value,
+            lineMark: [],
+            lineMarkFormulas: [],
+            colorCover: document.getElementById('r_colorCover').value.trim() || ""
+        };
+    }
+    function buildOthersWorkItem() {
+        const obj = { workItemType: "Others" };
+        for (const [uiId, contractId] of Object.entries(OTHERS_IDS)) {
+            const cb = document.getElementById(uiId);
+            if (cb && cb.checked) {
+                const valEl = document.getElementById(uiId + '_val');
+                if (valEl && valEl.value) obj[contractId] = valEl.value;
+            }
+        }
+        return obj;
+    }
+
+    async function calculateAPI(tab) {
+        let workItem;
+        if (tab === 'main') workItem = buildMainWorkItem();
+        else if (tab === 'cover') workItem = buildCoverWorkItem();
+        else if (tab === 'recover') workItem = buildRecoverWorkItem();
+        else if (tab === 'others') workItem = buildOthersWorkItem();
+        else return;
+
+        const response = await fetch('/api/calculate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(workItem) });
+        const result = await response.json();
+        if (result.status === "success") {
+            currentPreviewData = result.detail;
+            currentWorkItemType = workItem.workItemType;
+            currentWorkItemPayload = workItem;
+            const tbody = document.getElementById('calcDetailBody');
+            tbody.innerHTML = result.detail.map(row => `
+                <tr>
+                    <td>${row[0]}</td>
+                    <td style="${row[0]==='' ? 'color:gray; font-size:0.8rem;' : ''}">${row[1]}</td>
+                    <td>${row[2]}</td>
+                    <td>${row[3]}</td>
+                    <td>${row[4]}</td>
+                </tr>
+            `).join('');
+
+            // automatically add work item after successful calculation
+            confirmAddItem();
+        } else {
+            alert('計算失敗：' + (result.message || ''));
+        }
+    }
+
+    function getFirstRowSummary() {
+        if (!currentPreviewData || currentPreviewData.length < 2) return { name: '工項', qty: '-', unit: '-' };
+        const row = currentPreviewData.find(r => r[0] && r[0] !== '');
+        return row ? { name: row[1], qty: row[3], unit: row[4] } : { name: '工項', qty: '-', unit: '-' };
+    }
+
+    function confirmAddItem() {
+        if (!currentPreviewData) { alert('請先按「計算並預覽」'); return; }
+        const sum = getFirstRowSummary();
+        workItemsList.push({
+            workItemType: currentWorkItemType,
+            workItem: currentWorkItemPayload,
+            detailRows: currentPreviewData,
+            name: sum.name,
+            qty: sum.qty,
+            unit: sum.unit
+        });
+        renderWorkItems();
+    }
+
+    function renderWorkItems() {
+        const tbody = document.getElementById('workItemsTableBody');
+        tbody.innerHTML = workItemsList.map((item, idx) => `
+            <tr class="${selectedRowIndex === idx ? 'table-primary' : ''}" data-idx="${idx}">
+                <td><input type="radio" name="workRow" ${selectedRowIndex === idx ? 'checked' : ''} onclick="selectedRowIndex=${idx}; renderWorkItems();"></td>
+                <td>${item.name}</td>
+                <td>${item.qty}</td>
+                <td>${item.unit}</td>
+                <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteItemAt(${idx})">刪除</button></td>
+            </tr>
+        `).join('');
+    }
+
+    function deleteItemAt(idx) {
+        workItemsList.splice(idx, 1);
+        if (selectedRowIndex === idx) selectedRowIndex = -1;
+        else if (selectedRowIndex > idx) selectedRowIndex--;
+        renderWorkItems();
+    }
+
+    function deleteSelectedItem() {
+        if (selectedRowIndex < 0) { alert('請先選取一筆工項'); return; }
+        deleteItemAt(selectedRowIndex);
+    }
+
+    function moveUpItem() {
+        if (selectedRowIndex <= 0) { alert('請選取一筆且非第一筆'); return; }
+        const t = workItemsList[selectedRowIndex];
+        workItemsList[selectedRowIndex] = workItemsList[selectedRowIndex - 1];
+        workItemsList[selectedRowIndex - 1] = t;
+        selectedRowIndex--;
+        renderWorkItems();
+    }
+
+    function clearWorkItems() {
+        if (!confirm('確定清除全部工項？')) return;
+        workItemsList = [];
+        selectedRowIndex = -1;
+        renderWorkItems();
+    }
+
+    function saveTemp() {
+        const data = {
+            caseHeader: { surveyDate: document.getElementById('surveyDate').value, startDate: document.getElementById('startDate').value, expectDate: document.getElementById('expectDate').value, submitDay: document.getElementById('submitDay').value, caseType: document.getElementById('caseType').value, workingPosition: document.getElementById('workingPosition').value, noticeNo: document.getElementById('noticeNo').value, surveyStaff: document.getElementById('surveyStaff').value, contractTxt: document.getElementById('contractTxt').value, mapNum: document.getElementById('mapNum').value },
+            workItemsList
+        };
+        try {
+            localStorage.setItem('designHelper_temp', JSON.stringify(data));
+            alert('已暫存');
+        } catch (e) { alert('暫存失敗'); }
+    }
+
+    function loadTemp() {
+        try {
+            const raw = localStorage.getItem('designHelper_temp');
+            if (!raw) { alert('尚無暫存資料'); return; }
+            const data = JSON.parse(raw);
+            if (data.caseHeader) {
+                const h = data.caseHeader;
+                if (h.surveyDate) document.getElementById('surveyDate').value = h.surveyDate;
+                if (h.startDate) document.getElementById('startDate').value = h.startDate;
+                if (h.expectDate !== undefined) document.getElementById('expectDate').value = h.expectDate;
+                if (h.submitDay) document.getElementById('submitDay').value = h.submitDay;
+                if (h.caseType) document.getElementById('caseType').value = h.caseType;
+                if (h.workingPosition !== undefined) document.getElementById('workingPosition').value = h.workingPosition;
+                if (h.noticeNo !== undefined) document.getElementById('noticeNo').value = h.noticeNo;
+                if (h.surveyStaff !== undefined) document.getElementById('surveyStaff').value = h.surveyStaff;
+                if (h.contractTxt) document.getElementById('contractTxt').value = h.contractTxt;
+                if (h.mapNum !== undefined) document.getElementById('mapNum').value = h.mapNum;
+            }
+            if (Array.isArray(data.workItemsList)) {
+                workItemsList = data.workItemsList;
+                selectedRowIndex = -1;
+                renderWorkItems();
+            }
+            alert('已匯入暫存');
+        } catch (e) { alert('匯入失敗'); }
+    }
+
+    function getCaseData() {
+        return {
+            surveyDate: document.getElementById('surveyDate').value,
+            startDate: document.getElementById('startDate').value,
+            expectDate: document.getElementById('expectDate').value,
+            submitDay: document.getElementById('submitDay').value,
+            caseType: getCaseType(),
+            workingPosition: document.getElementById('workingPosition').value,
+            noticeNo: document.getElementById('noticeNo').value,
+            surveyStaff: document.getElementById('surveyStaff').value,
+            contractTxt: document.getElementById('contractTxt').value,
+            district: document.getElementById('district').value,
+            areaGroup: (document.querySelector('input[name="areaGroup"]:checked') || {}).value,
+            mapNum: document.getElementById('mapNum').value
+        };
+    }
+
+    function downloadFinalJson() {
+        const workItemsDict = {};
+        const caculateDataDict = {};
+        workItemsList.forEach((item, i) => {
+            const key = 'item' + (i + 1);
+            workItemsDict[key] = [item.name, item.qty, item.unit];
+            caculateDataDict[key] = item.detailRows || [];
+        });
+        const payload = {
+            workItemsDict,
+            caculateDataDict,
+            caseData: getCaseData()
+        };
+        fetch('/api/save_json', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+            .then(r => r.json())
+            .then(result => {
+                if (result.status !== 'success') { alert(result.message || '導出失敗'); return; }
+                const blob = new Blob([result.json_str], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = '通報單資料.json';
+                a.click();
+                URL.revokeObjectURL(a.href);
+            })
+            .catch(() => alert('導出失敗'));
+    }
 </script>
 
 </body>
+
 </html>
