@@ -265,10 +265,10 @@
     <div class="sticky-footer d-flex justify-content-between align-items-center shadow-sm px-4">
         <div class="d-flex align-items-center">
             <span class="me-2 fw-bold text-secondary" style="white-space: nowrap;">工項輸入過程:</span>
-            <button class="btn btn-outline-secondary btn-sm me-2" onclick="saveToLocalStorage()">
+            <button class="btn btn-outline-secondary btn-sm me-2" onclick="saveTemp()">
                 <i class="bi bi-save"></i> 暫存 (Save)
             </button>
-            <button class="btn btn-outline-secondary btn-sm" onclick="loadFromLocalStorage()">
+            <button class="btn btn-outline-secondary btn-sm" onclick="loadTemp()">
                 <i class="bi bi-folder2-open"></i> 匯入 (Load)
             </button>
         </div>
@@ -457,14 +457,28 @@
     }
 
     function saveTemp() {
-        const data = {
-            caseHeader: { surveyDate: document.getElementById('surveyDate').value, startDate: document.getElementById('startDate').value, expectDate: document.getElementById('expectDate').value, submitDay: document.getElementById('submitDay').value, caseType: document.getElementById('caseType').value, workingPosition: document.getElementById('workingPosition').value, noticeNo: document.getElementById('noticeNo').value, surveyStaff: document.getElementById('surveyStaff').value, contractTxt: document.getElementById('contractTxt').value, mapNum: document.getElementById('mapNum').value },
-            workItemsList
-        };
         try {
+            const data = {
+                caseHeader: {
+                    surveyDate: (document.getElementById('surveyDate') || {}).value || '',
+                    startDate: (document.getElementById('startDate') || {}).value || '',
+                    expectDate: (document.getElementById('expectDate') || {}).value || '',
+                    submitDay: (document.getElementById('submitDay') || {}).value || '',
+                    caseType: (document.getElementById('caseType') || {}).value || '',
+                    workingPosition: (document.getElementById('workingPosition') || {}).value || '',
+                    noticeNo: (document.getElementById('noticeNo') || {}).value || '',
+                    surveyStaff: (document.getElementById('surveyStaff') || {}).value || '',
+                    contractTxt: (document.getElementById('contractTxt') || {}).value || '',
+                    mapNum: (document.getElementById('mapNum') || {}).value || ''
+                },
+                workItemsList
+            };
             localStorage.setItem('designHelper_temp', JSON.stringify(data));
             alert('已暫存');
-        } catch (e) { alert('暫存失敗'); }
+        } catch (e) {
+            console.error('saveTemp error', e);
+            alert('暫存失敗: ' + (e && e.message ? e.message : e));
+        }
     }
 
     function loadTemp() {
@@ -525,7 +539,10 @@
             caseData: getCaseData()
         };
         fetch('/api/save_json', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-            .then(r => r.json())
+            .then(r => {
+                if (!r.ok) throw new Error('伺服器回應 ' + r.status);
+                return r.json().catch(() => { throw new Error('無法解析伺服器回應'); });
+            })
             .then(result => {
                 if (result.status !== 'success') { alert(result.message || '導出失敗'); return; }
                 const blob = new Blob([result.json_str], { type: 'application/json' });
@@ -535,7 +552,7 @@
                 a.click();
                 URL.revokeObjectURL(a.href);
             })
-            .catch(() => alert('導出失敗'));
+            .catch(err => { console.error('downloadFinalJson error', err); alert('導出失敗: ' + (err && err.message ? err.message : err)); });
     }
 </script>
 
