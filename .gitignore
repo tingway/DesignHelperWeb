@@ -3,4 +3,5 @@
 /log/
 /debug/
 /backup/
+/test/
 /*.spec
