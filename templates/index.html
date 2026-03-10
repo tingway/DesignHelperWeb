@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #fadea2; font-family: "Microsoft JhengHei", sans-serif; }
+        /* for test #81e8f0, for local #fadea2  */
         .case-header { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 15px; }
         /* 設定左右兩欄等高或滾動 */
         .main-content { height: calc(100vh - 250px); overflow: hidden; }
@@ -139,7 +140,7 @@
                         </div>
                     </div>
                     <div class="mt-3">
-                        <button class="btn btn-primary w-100" onclick="calculateAPI('main')">計算並預覽並加入工項</button>
+                        <button class="btn btn-primary w-100" onclick="calculateAPI('main')">加入工項並預覽</button>
                     </div>
                 </div>
 
@@ -170,7 +171,7 @@
                         </div>
                     </div>
                     <div class="mt-3">
-                        <button class="btn btn-primary w-100" onclick="calculateAPI('cover')">計算並預覽並加入工項</button>
+                        <button class="btn btn-primary w-100" onclick="calculateAPI('cover')">加入工項並預覽</button>
                     </div>
                 </div>
 
@@ -190,38 +191,38 @@
                         <div class="col-md-4"><label class="form-label small">厚度</label>
                             <select class="form-select form-select-sm" id="r_Thick"><option value="13cm">13cm</option><option value="15cm">15cm</option><option value="5cm">5cm</option><option value="10cm">10cm</option></select>
                         </div>
-                        <div class="col-md-4"><label class="form-label small">施作長度 m</label><input type="text" class="form-control form-control-sm" id="r_Length" value="1" placeholder="可填算式"></div>
+                        <div class="col-md-4"><label class="form-label small">施作長度m(或銑鋪算式m2)</label><input type="text" class="form-control form-control-sm" id="r_Length" value="1" placeholder="可填算式"></div>
                         <div class="col-md-4"><label class="form-label small">切割寬度 cm</label><input type="number" class="form-control form-control-sm" id="r_Width" value="10"></div>
                         <div class="col-md-4"><label class="form-label small">色彩舖面 (算式)</label><input type="text" class="form-control form-control-sm" id="r_colorCover" placeholder="選填"></div>
                     </div>
                     <div class="mt-3">
-                        <button class="btn btn-primary w-100" onclick="calculateAPI('recover')">計算並預覽並加入工項</button>
+                        <button class="btn btn-primary w-100" onclick="calculateAPI('recover')">加入工項並預覽</button>
                     </div>
                 </div>
 
                 <div class="tab-pane fade" id="othersTab">
                     <div class="row g-2 small">
-                        <div class="col-6 col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" id="o_cuttingAC"><label class="form-check-label">切割瀝青混凝土(㎡)</label></div><input type="text" class="form-control form-control-sm" id="o_cuttingAC_val" placeholder="算式" disabled></div>
+                        <div class="col-6 col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" id="o_cuttingAC" checked><label class="form-check-label">切割瀝青混凝土(㎡)</label></div><input type="text" class="form-control form-control-sm" id="o_cuttingAC_val" placeholder="算式" disabled></div>
                         <div class="col-6 col-md-4"><div class="form-check" title="1.421"><input class="form-check-input" type="checkbox" id="o_camera" checked><label class="form-check-label">攝影機(日/台)</label></div><input type="text" class="form-control form-control-sm" id="o_camera_val" value="7" disabled></div>
                         <div class="col-6 col-md-4"><div class="form-check" title="1.429"><input class="form-check-input" type="checkbox" id="o_trafficCtrl" checked><label class="form-check-label">義交編列(時)</label></div><input type="text" class="form-control form-control-sm" id="o_trafficCtrl_val" value="1" disabled></div>
                         <div class="col-6 col-md-4"><div class="form-check" title="1.4"><input class="form-check-input" type="checkbox" id="o_supportLabor" checked><label class="form-check-label">配合技術之勞工(時)</label></div><input type="text" class="form-control form-control-sm" id="o_supportLabor_val" value="8*3" disabled></div>
                         <div class="col-6 col-md-4"><div class="form-check" title="1.432"><input class="form-check-input" type="checkbox" id="o_sectionalSteelFens"><label class="form-check-label">型鋼護欄(m)</label></div><input type="text" class="form-control form-control-sm" id="o_sectionalSteelFens_val" disabled></div>
                         <div class="col-6 col-md-4"><div class="form-check" title="1.433"><input class="form-check-input" type="checkbox" id="o_channelSteelFens"><label class="form-check-label">槽鋼護欄(m)</label></div><input type="text" class="form-control form-control-sm" id="o_channelSteelFens_val" disabled></div>
-                        <div class="col-6 col-md-4"><div class="form-check" title="1.11"><input class="form-check-input" type="checkbox" id="o_sprinklerTruck" checked><label class="form-check-label">洒水車(時)</label></div><input type="text" class="form-control form-control-sm" id="o_sprinklerTruck_val" value="4" disabled></div>
+                        <div class="col-6 col-md-4"><div class="form-check" title="1.11"><input class="form-check-input" type="checkbox" id="o_sprinklerTruck" checked><label class="form-check-label">灑水車(時)</label></div><input type="text" class="form-control form-control-sm" id="o_sprinklerTruck_val" value="4" disabled></div>
                         <div class="col-6 col-md-4"><div class="form-check" title="1.3"><input class="form-check-input" type="checkbox" id="o_truckDriver" checked><label class="form-check-label">駕駛小貨車(時)</label></div><input type="text" class="form-control form-control-sm" id="o_truckDriver_val" value="4" disabled></div>
                         <div class="col-6 col-md-4"><div class="form-check" title="1.16"><input class="form-check-input" type="checkbox" id="o_craneTruck" checked><label class="form-check-label">吊卡車(時)</label></div><input type="text" class="form-control form-control-sm" id="o_craneTruck_val" value="4" disabled></div>
                         <div class="col-6 col-md-4"><div class="form-check" title="1.19"><input class="form-check-input" type="checkbox" id="o_wheelLoaderTruck" checked><label class="form-check-label">輪式裝載車(時)</label></div><input type="text" class="form-control form-control-sm" id="o_wheelLoaderTruck_val" value="4" disabled></div>
                         <div class="col-6 col-md-4"><div class="form-check" title="1.1"><input class="form-check-input" type="checkbox" id="o_heavyMachineDriver" checked><label class="form-check-label">操作手重機械(時)</label></div><input type="text" class="form-control form-control-sm" id="o_heavyMachineDriver_val" value="4+4" disabled></div>
                         <div class="col-6 col-md-4"><div class="form-check" title="1.396"><input class="form-check-input" type="checkbox" id="o_emergencyRepair" checked><label class="form-check-label">緊急搶修路面開挖(處)</label></div><input type="text" class="form-control form-control-sm" id="o_emergencyRepair_val" value="1" disabled></div>
-                        <div class="col-6 col-md-4"><div class="form-check" title="1.364/1.366"><input class="form-check-input" type="checkbox" id="o_pump" checked><label class="form-check-label">抽水機(時)</label></div><input type="text" class="form-control form-control-sm" id="o_pump_val" value="7" disabled></div>
-                        <div class="col-6 col-md-4"><div class="form-check" title="1.366"><input class="form-check-input" type="checkbox" id="o_sandBag"><label class="form-check-label">圍水砂包(㎡)</label></div><input type="text" class="form-control form-control-sm" id="o_sandBag_val" disabled></div>
-                        <div class="col-6 col-md-4"><div class="form-check" title="1.421"><input class="form-check-input" type="checkbox" id="o_surveying" checked><label class="form-check-label">施工測量(次)</label></div><input type="text" class="form-control form-control-sm" id="o_surveying_val" value="1" disabled></div>
-                        <div class="col-6 col-md-4"><div class="form-check" title="1.433"><input class="form-check-input" type="checkbox" id="o_humanSteelPlate" checked><label class="form-check-label">人行跨越鋼板(組)</label></div><input type="text" class="form-control form-control-sm" id="o_humanSteelPlate_val" value="1" disabled></div>
-                        <div class="col-6 col-md-4"><div class="form-check" title="1.333/1.335"><input class="form-check-input" type="checkbox" id="o_tempSteelPlate"><label class="form-check-label">臨時覆蓋鋼板(㎡)</label></div><input type="text" class="form-control form-control-sm" id="o_tempSteelPlate_val" disabled></div>
+                        <div class="col-6 col-md-4"><div class="form-check" title="1.364"><input class="form-check-input" type="checkbox" id="o_pump" checked><label class="form-check-label">抽水機(時)</label></div><input type="text" class="form-control form-control-sm" id="o_pump_val" value="7" disabled></div>
+                        <div class="col-6 col-md-4"><div class="form-check" title="1.366"><input class="form-check-input" type="checkbox" id="o_sandBag" checked><label class="form-check-label">圍水砂包(㎡)</label></div><input type="text" class="form-control form-control-sm" id="o_sandBag_val" disabled></div>
+                        <div class="col-6 col-md-4"><div class="form-check" title="1.421"><input class="form-check-input" type="checkbox" id="o_surveying"><label class="form-check-label">施工測量(次)</label></div><input type="text" class="form-control form-control-sm" id="o_surveying_val" value="1" disabled></div>
+                        <div class="col-6 col-md-4"><div class="form-check" title="1.335"><input class="form-check-input" type="checkbox" id="o_humanSteelPlate"><label class="form-check-label">人行跨越鋼板(組)</label></div><input type="text" class="form-control form-control-sm" id="o_humanSteelPlate_val" value="1" disabled></div>
+                        <div class="col-6 col-md-4"><div class="form-check" title="1.333"><input class="form-check-input" type="checkbox" id="o_tempSteelPlate"><label class="form-check-label">臨時覆蓋鋼板(㎡)</label></div><input type="text" class="form-control form-control-sm" id="o_tempSteelPlate_val" disabled></div>
                         <div class="col-6 col-md-4"><div class="form-check" title="1.387"><input class="form-check-input" type="checkbox" id="o_smallMachine" checked><label class="form-check-label">臨時設施小型機具(次)</label></div><input type="text" class="form-control form-control-sm" id="o_smallMachine_val" value="1" disabled></div>
                     </div>
                     <div class="mt-3">
-                        <button class="btn btn-primary w-100" onclick="calculateAPI('others')">計算並預覽並加入工項</button>
+                        <button class="btn btn-primary w-100" onclick="calculateAPI('others')">加入工項並預覽</button>
                     </div>
                 </div>
             </div>
@@ -290,7 +291,10 @@
     let currentWorkItemPayload = null;
     let selectedRowIndex = -1;
 
-    const OTHERS_IDS = { o_cuttingAC:'1.97', o_camera:'1.421', o_trafficCtrl:'1.429', o_supportLabor:'1.4', o_sectionalSteelFens:'1.432', o_channelSteelFens:'1.433', o_sprinklerTruck:'1.11', o_truckDriver:'1.3', o_craneTruck:'1.16', o_wheelLoaderTruck:'1.19', o_heavyMachineDriver:'1.1', o_emergencyRepair:'1.396', o_pump:'1.364', o_sandBag:'1.366', o_surveying:'1.421', o_humanSteelPlate:'1.432', o_tempSteelPlate:'1.333', o_smallMachine:'1.387' };
+    const OTHERS_IDS = { o_cuttingAC:'1.97', o_camera:'1.421', o_trafficCtrl:'1.429', o_supportLabor:'1.4', o_sectionalSteelFens:'1.432',
+                o_channelSteelFens:'1.433', o_sprinklerTruck:'1.11', o_truckDriver:'1.3', o_craneTruck:'1.16', o_wheelLoaderTruck:'1.19',
+                o_heavyMachineDriver:'1.1', o_emergencyRepair:'1.396', o_pump:'1.364', o_sandBag:'1.366', o_surveying:'1.421',
+                o_humanSteelPlate:'1.335', o_tempSteelPlate:'1.333', o_smallMachine:'1.387' };
 
     document.querySelectorAll('#othersTab .form-check-input[type="checkbox"]').forEach(el => {
         const valId = el.id + '_val';
@@ -298,54 +302,126 @@
         if (valEl) { valEl.disabled = !el.checked; el.addEventListener('change', function(){ document.getElementById(valId).disabled = !this.checked; }); }
     });
 
-    function getCaseType() { return document.getElementById('caseType').value; }
-
     function buildMainWorkItem() {
+        const structureType = document.getElementById('m_structureType').value;
+        const multipleNO = document.getElementById('m_multipleNO').value;
+        const workType = document.getElementById('m_workType').value;
+        const width = document.getElementById('m_Width').value;
+        const depth = document.getElementById('m_Depth').value;
+        const widthName = "淨寬"; // 預設對應 Python 的 WidthName
+
+        // 1. 定義深度名稱對照表
+        const depthNameMap = {
+            "側溝": "平均溝深",
+            "集水井": "井深",
+            "暗溝": "溝深",
+            "鋼筋混凝土管": ""
+        };
+        const depthName = depthNameMap[structureType] || "";
+
+        // 2. 根據構造物型式產生工項名稱 (workItemName)
+        let workItemName = "";
+        if (structureType === "鋼筋混凝土管") {
+            // 既有鋼筋混凝土管(ØXXX)修復-脫管修復一處
+            workItemName = `既有鋼筋混凝土管(Ø${parseInt(width) * 10})修復-脫管修復一處`;
+        } else if (structureType === "集水井") {
+            // 集水井[編號][類型]-淨寬[寬度]m*井深[深度]m 頂板另計
+            workItemName = `集水井${multipleNO}${workType}-${widthName}${parseFloat(width) / 100}m*${depthName}${parseFloat(depth) / 100}m 頂板另計`;
+        } else {
+            // [構造物][編號][類型]-淨寬[寬度]m*[深度名][深度]m 頂板另計
+            workItemName = `${structureType}${multipleNO}${workType}-${widthName}${parseFloat(width) / 100}m*${depthName}${parseFloat(depth) / 100}m 頂板另計`;
+        }
+
+        // 3. 回傳包含 workItemName 的物件
         return {
-            workItemType: "Main Sturcture",
-            structureType: document.getElementById('m_structureType').value,
-            caseType: getCaseType(),
-            multipleNO: document.getElementById('m_multipleNO').value,
-            workType: document.getElementById('m_workType').value,
+            workItemType: "Main Structure",
+            structureType: structureType,
+            caseType: document.getElementById('caseType').value,
+            multipleNO: multipleNO,
+            workType: workType,
             oldType: document.getElementById('m_oldType').value,
             outerFrame: document.getElementById('m_outerFrame').value,
             Length: document.getElementById('m_Length').value,
             WallThick: document.getElementById('m_WallThick').value,
-            Width: document.getElementById('m_Width').value,
-            WidthName: "淨寬",
-            Depth: document.getElementById('m_Depth').value,
+            Width: width,
+            WidthName: widthName,
+            Depth: depth,
             depthRange: document.getElementById('m_depthRange').value,
-            depthName: "平均深",
+            depthName: depthName,
             oldWidth: document.getElementById('m_oldWidth').value,
             oldDepth: document.getElementById('m_oldDepth').value,
             oldWallThick: document.getElementById('m_oldWallThick').value,
-            colorCover: ""
+            workItemName: workItemName // 加入產出的工項名稱
         };
     }
     function buildCoverWorkItem() {
+        // 1. 抓取 UI 欄位值 (請確保 ID 與您的 HTML 一致)
+        const structureType = document.getElementById('c_structureType').value; // 例如: 側溝頂板
+        const multipleNO = document.getElementById('c_multipleNO').value;
+        const workType = document.getElementById('c_workType').value;
+        const coverWidthRaw = document.getElementById('c_coverWidth').value;
+        const coverThickRaw = document.getElementById('c_coverThick').value; // 例如: 13cm
+        const coverType = document.getElementById('c_coverType').value;
+
+        // 2. 數值轉換與對照 (對應 Python 的 round 與 dict)
+        const coverWidth = (parseFloat(coverWidthRaw) / 100).toFixed(2);
+        const thickMap = { "13cm": 0.13, "15cm": 0.15, "5cm": 0.05, "10cm": 0.1 };
+        const coverThick = thickMap[coverThickRaw] || 0.13;
+
+        // 3. 產生 workItemName 邏輯
+        let workItemName = "";
+        if (structureType === "暗溝頂板") {
+            workItemName = `暗溝${multipleNO}頂板${workType}-頂板寬${coverWidth}m*頂板厚0.2m`;
+        } else if (structureType === "側溝頂板") {
+            workItemName = `側溝${multipleNO}頂板${workType}-頂板寬${coverWidth}m*頂板厚${coverThick}m`;
+        } else {
+            workItemName = `集水井${multipleNO}頂板${workType}-頂板寬${coverWidth}m*頂板厚${coverThick}m`;
+        }
+
+        // 4. 回傳 Payload
         return {
-            workItemType: "Cover Sturcture",
-            structureType: document.getElementById('c_structureType').value,
-            caseType: getCaseType(),
-            multipleNO: document.getElementById('c_multipleNO').value,
-            workType: document.getElementById('c_workType').value,
-            coverType: document.getElementById('c_coverType').value,
+            workItemType: "Cover Structure",
+            structureType: structureType,
+            caseType: document.getElementById('caseType').value,
+            multipleNO: multipleNO,
+            workType: workType,
+            coverType: coverType,
             Length: document.getElementById('c_Length').value,
-            coverWidth: document.getElementById('c_coverWidth').value,
-            coverThick: document.getElementById('c_coverThick').value,
+            coverWidth: coverWidthRaw,
+            coverWidthName: "頂板寬",
+            coverThick: coverThickRaw,
+            coverThickName: "頂板厚",
             grilleWidth: document.getElementById('c_grilleWidth').value,
-            grilleType: document.getElementById('c_grilleType').value
+            grilleType: document.getElementById('c_grilleType').value,
+            workItemName: workItemName
         };
     }
     function buildRecoverWorkItem() {
+        const recoverType = document.getElementById('r_recoverType').value;
+        const materialType = document.getElementById('r_materialType').value;
+        const width = document.getElementById('r_Width').value;
+        const Thick = document.getElementById('r_Thick').value;
+
+        const recoverMaterialmap = { "AC回填":"採用AC回填", "樹脂混凝土":"採用樹脂混凝土", "RC混凝土":"採用RC回填",
+                                "一般瀝青":"採用一般瀝青", "再生瀝青":"採用再生瀝青", "改質瀝青":"採用改質III型" };
+        const recoverMaterial = recoverMaterialmap[materialType] || "採用AC回填";
+
+        let workItemName = "";
+        if (recoverType === "路面切割") {
+            workItemName = `採用${recoverType}${width}公分復舊-${recoverMaterial}，復舊厚度為${Thick}`;
+        } else {
+            workItemName = `${recoverType}復舊-${recoverMaterial}，復舊厚度為${Thick}`;
+        }
+
         return {
             workItemType: "Recover",
-            caseType: getCaseType(),
-            recoverType: document.getElementById('r_recoverType').value,
-            materialType: document.getElementById('r_materialType').value,
-            Thick: document.getElementById('r_Thick').value,
+            caseType: document.getElementById('caseType').value,
+            recoverType: recoverType,
+            materialType: materialType,
+            workItemName: workItemName,
+            Width: width,
+            Thick: Thick,
             Length: document.getElementById('r_Length').value,
-            Width: document.getElementById('r_Width').value,
             lineMark: [],
             lineMarkFormulas: [],
             colorCover: document.getElementById('r_colorCover').value.trim() || ""
@@ -402,15 +478,36 @@
     }
 
     function confirmAddItem() {
-        if (!currentPreviewData) { alert('請先按「計算並預覽」'); return; }
-        const sum = getFirstRowSummary();
+        if (!currentPreviewData) { alert('請先按「加入工項並預覽」'); return; }
+        // 1. 取得由 buildXXXXWorkItem 產生的 payload 資料
+        const item = currentWorkItemPayload;
+        // 2. 初始化名稱、數量、單位 (比照 PySide 邏輯)
+        let displayName = item.workItemName || "其他工項";
+        let displayQty = "1";
+        let displayUnit = "式";
+
+        // 3. 判斷數量與單位 (參考您提供的 Python 條件分支)
+        if (item.workItemType === "Others"|| item.workItemType === "Recover") {
+            // "structureType" not in self.workItemsDict
+            displayQty = "1";
+            displayUnit = "式";
+        } else if (item.structureType === "鋼筋混凝土管") {
+            displayQty = "1";
+            displayUnit = "處";
+        } else {
+            // 側溝、集水井、暗溝或頂板等工項，使用長度
+            displayQty = item.Length || "1";
+            displayUnit = "m";
+        }
+
+        // 4. 加入全域清單並渲染
         workItemsList.push({
             workItemType: currentWorkItemType,
             workItem: currentWorkItemPayload,
             detailRows: currentPreviewData,
-            name: sum.name,
-            qty: sum.qty,
-            unit: sum.unit
+            name: displayName,
+            qty: displayQty,
+            unit: displayUnit
         });
         renderWorkItems();
     }
@@ -514,7 +611,7 @@
             startDate: document.getElementById('startDate').value,
             submitDay: document.getElementById('submitDay').value,
             expectDate: document.getElementById('expectDate').value,
-            caseType: getCaseType(),
+            caseType: document.getElementById('caseType').value,
             workingPosition: document.getElementById('workingPosition').value,
             noticeNo: document.getElementById('noticeNo').value,
             surveyStaff: document.getElementById('surveyStaff').value,
@@ -527,8 +624,8 @@
         const workItemsDict = {};
         const caculateDataDict = {};
         workItemsList.forEach((item, i) => {
-            const key = 'item' + (i + 1);
-            workItemsDict[key] = [item.name, item.qty, item.unit];
+            const key = item.name;
+            workItemsDict[key] = item.workItem;
             caculateDataDict[key] = item.detailRows || [];
         });
         const payload = {

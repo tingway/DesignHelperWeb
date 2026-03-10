@@ -9,6 +9,7 @@ with open(jsonFilePath, 'r', encoding='utf-8') as f:
     contractData = json.load(f)
 
 def calKernel(workItemType, workItem):
+    print(workItem)
     calDetail = []
     """ 變數列表
     structureType : 側溝、集水井、暗溝、脫管修復
@@ -38,13 +39,13 @@ def calKernel(workItemType, workItem):
     baseRoadDig: 基礎路幅開挖
     structureDig: 結構開挖
     remaingSoil: 餘方自行處理
-    concrete140: 混凝土140 
-    concreteMain: 混凝土210or 280 
+    concrete140: 混凝土140
+    concreteMain: 混凝土210or 280
     steelFrame: 鋼模
     steelSD280W: 鋼筋SD280"""
 
     ## 主構造物
-    if workItemType == "Main Sturcture":
+    if workItemType == "Main Structure":
         ### 變數設定
         structureType = workItem["structureType"]
         caseType = workItem["caseType"]
@@ -75,8 +76,8 @@ def calKernel(workItemType, workItem):
         ### 公式字串
         machineDestroy_txt, humanDestroy_txt, baseRoadDig_txt, structureDig_txt, remaingSoil_txt = "", "", "", "", ""
         concrete140_txt, concreteMain_txt, steelFrame_txt, steelSD280W_txt = "", "", "", ""
-        asphaltConcrete_txt = ""        
-        ### 機拆人拆用 (舊總體積)-(舊鏤空部份)，基地路幅開挖用 (新總體積)-(舊總體積), 
+        asphaltConcrete_txt = ""
+        ### 機拆人拆用 (舊總體積)-(舊鏤空部份)，基地路幅開挖用 (新總體積)-(舊總體積),
         ### 餘方用 (新總體積)-(舊鏤空部份)，混凝土用 (新總體積)-(新鏤空部份)
 
         if structureType == "側溝" or structureType == "暗溝":
@@ -228,7 +229,7 @@ def calKernel(workItemType, workItem):
         1.403 瀝青混凝土舖面
         """
         contractInx = ["1.38", "1.26", "1.31", "1.43", "1.60", "1.99", "1.102", "1.137", "1.156"]
-        itemTxtList = [machineDestroy_txt, humanDestroy_txt, baseRoadDig_txt, structureDig_txt, remaingSoil_txt, 
+        itemTxtList = [machineDestroy_txt, humanDestroy_txt, baseRoadDig_txt, structureDig_txt, remaingSoil_txt,
                        concrete140_txt, concreteMain_txt, steelFrame_txt, steelSD280W_txt]
         if structureType == "側溝" or structureType == "暗溝":
             inx_concreteMain = contractInx.index("1.102")
@@ -259,7 +260,7 @@ def calKernel(workItemType, workItem):
         if structureType == "鋼筋混凝土管":
             contractInx = ["1.60","1.99", "1.168", "1.156", "1.403"]
             itemTxtList = [remaingSoil_txt, concrete140_txt, steelFrame_txt, steelSD280W_txt, asphaltConcrete_txt]
-                
+
         contractInx = [contractInx[inx] for inx, item in enumerate(itemTxtList) if item]
         itemValList = [round(eval(item)+1e-12,3) for item in itemTxtList if item]
         itemTxtList = [item for item in itemTxtList if item]
@@ -267,16 +268,16 @@ def calKernel(workItemType, workItem):
         for item in itemTxtList:
             if "**" in item:
                 inx = itemTxtList.index(item)
-                itemTxtList[inx] = item.replace("**","^") 
-                   
+                itemTxtList[inx] = item.replace("**","^")
+
         for i in range(len(contractInx)):
             calDetail.append([contractInx[i], contractData[contractInx[i]][0], "=", f"{itemValList[i]:.3f}", contractData[contractInx[i]][1]] )
             calDetail.append(["", itemTxtList[i], "", "", ""])
 
     ## 頂板
-    elif workItemType == "Cover Sturcture":     
+    elif workItemType == "Cover Structure":
         structureType = workItem["structureType"]
-        caseType = workItem["caseType"] 
+        caseType = workItem["caseType"]
         workType = workItem["workType"]
         coverType = workItem["coverType"]
         Length = float(workItem["Length"])
@@ -288,7 +289,7 @@ def calKernel(workItemType, workItem):
         machineDestroy_txt, humanDestroy_txt, baseRoadDig_txt, structureDig_txt, remaingSoil_txt,  = "", "", "", "", ""
         concreteMain_txt, steelSD280W_txt, steelFrame_txt, wireTube_txt, grilleAndFrame_txt, normalFrame_txt = "", "", "", "", "", ""
         asphaltStickLayer_txt, asphaltConcrete95_txt, asphaltConcrete190_txt = "", "", ""
-        
+
         if structureType == "側溝頂板" or structureType == "集水井頂板":
             if caseType == "一般案":
                 if workType == "更新":
@@ -300,12 +301,12 @@ def calKernel(workItemType, workItem):
                     baseRoadDig_txt = {"S1":f"({coverWidth}*{coverThick})*0.8",
                                        "S2":f"({coverWidth}*{coverThick})*0.8",
                                        "L1":f"({coverWidth}*{coverThick}+(0.15+0.18)*0.15/2)*0.8",
-                                       "L2":f"({coverWidth}*{coverThick}+(0.15+0.18)*0.15/2)*0.8"}[coverType] # 多加墩座         
+                                       "L2":f"({coverWidth}*{coverThick}+(0.15+0.18)*0.15/2)*0.8"}[coverType] # 多加墩座
             if workType == "更新":
                 remaingSoil_txt = {"S1":f"{coverWidth}*{coverThick}",
                                 "S2":f"{coverWidth}*{coverThick}-{grilleWidth}*0.65*{coverThick}",
                                 "L1":f"({coverWidth}*{coverThick}+(0.15+0.18)*0.15/2)",
-                                "L2":f"({coverWidth}*{coverThick}+(0.15+0.18)*0.15/2)-{grilleWidth}*0.65*{coverThick}"}[coverType] # 多加墩座   
+                                "L2":f"({coverWidth}*{coverThick}+(0.15+0.18)*0.15/2)-{grilleWidth}*0.65*{coverThick}"}[coverType] # 多加墩座
                 concreteMain_txt = {"S1":f"{coverWidth}*{coverThick}",
                                 "S2":f"{coverWidth}*{coverThick}-{grilleWidth}*0.65*{coverThick}",
                                 "L1":f"({coverWidth}*{coverThick}+(0.15+0.18)*0.15/2)",
@@ -314,7 +315,7 @@ def calKernel(workItemType, workItem):
                 remaingSoil_txt = {"S1":f"{coverWidth}*{coverThick}",
                                 "S2":f"{coverWidth}*{coverThick}",
                                 "L1":f"({coverWidth}*{coverThick}+(0.15+0.18)*0.15/2)",
-                                "L2":f"({coverWidth}*{coverThick}+(0.15+0.18)*0.15/2)"}[coverType] # 多加墩座    
+                                "L2":f"({coverWidth}*{coverThick}+(0.15+0.18)*0.15/2)"}[coverType] # 多加墩座
                 concreteMain_txt = {"S1":f"{coverWidth}*{coverThick}",
                                 "S2":f"{coverWidth}*{coverThick}-{grilleWidth}*0.65*{coverThick}",
                                 "L1":f"({coverWidth}*{coverThick}+(0.15+0.18)*0.15/2)",
@@ -338,8 +339,8 @@ def calKernel(workItemType, workItem):
             normalFrame_txt = {"S1":f"1*{coverThick}",
                             "S2":f"({grilleWidth}+0.65)*{coverThick}*2+1*{coverThick}",
                             "L1":f"1*{coverThick}*2",
-                            "L2":f"({grilleWidth}+0.65)*{coverThick}*2+1*{coverThick}*2"}[coverType]   
-            
+                            "L2":f"({grilleWidth}+0.65)*{coverThick}*2+1*{coverThick}*2"}[coverType]
+
         elif structureType == "暗溝頂板":
             if caseType == "一般案":
                 if workType == "更新":
@@ -358,13 +359,13 @@ def calKernel(workItemType, workItem):
                 asphaltStickLayer_txt = f"{coverWidth}*1*2"
                 asphaltConcrete190_txt = f"{coverWidth}*0.05"
             asphaltConcrete95_txt = f"{coverWidth}*0.05"
-        
+
         # 機拆->人拆, 基地路幅開挖->結構物開挖
         if machineDestroy_txt:
             humanDestroy_txt = machineDestroy_txt[:-1] + "2"
         if baseRoadDig_txt:
-            structureDig_txt = baseRoadDig_txt[:-1] + "2"            
-                 
+            structureDig_txt = baseRoadDig_txt[:-1] + "2"
+
         contractInx = ["1.38",  # 機械拆除
                        "1.26",  # 人工拆除
                        "1.31",  # 基地路幅開挖
@@ -380,10 +381,10 @@ def calKernel(workItemType, workItem):
                        "1.74",  # 瀝青混凝土舖面，粗粒料9.5mm，黏度AC(1)-20，零星工程
                        "1.77"   # 瀝青混凝土舖面，粗粒料19.0mm，黏度AC(1)-20，零星工程
                        ]
-        itemTxtList = [machineDestroy_txt, humanDestroy_txt, baseRoadDig_txt, structureDig_txt, remaingSoil_txt, concreteMain_txt, 
-                    steelFrame_txt, steelSD280W_txt, wireTube_txt, grilleAndFrame_txt, normalFrame_txt, 
+        itemTxtList = [machineDestroy_txt, humanDestroy_txt, baseRoadDig_txt, structureDig_txt, remaingSoil_txt, concreteMain_txt,
+                    steelFrame_txt, steelSD280W_txt, wireTube_txt, grilleAndFrame_txt, normalFrame_txt,
                     asphaltStickLayer_txt, asphaltConcrete95_txt, asphaltConcrete190_txt]
-        
+
         contractInx = [contractInx[inx] for inx, item in enumerate(itemTxtList) if item]
         itemValList = [round(eval(item)+1e-12,3) for item in itemTxtList if item]
         itemTxtList = [item for item in itemTxtList if item]
@@ -393,11 +394,11 @@ def calKernel(workItemType, workItem):
             contractInx[inx_grille] = {0.45:"1.276", 0.55:"1.277", 0.65:"1.278"}[grilleWidth]
             if grilleType == "細目型":
                 contractInx[inx_grille] = {0.45:"1.280", 0.55:"1.281", 0.65:"1.282"}[grilleWidth]
-    
+
         for i in range(len(contractInx)):
             calDetail.append([contractInx[i], contractData[contractInx[i]][0], "=", f"{itemValList[i]:.3f}", contractData[contractInx[i]][1]] )
             calDetail.append(["", itemTxtList[i], "", "", ""])
-    
+
     ## 復舊
     elif workItemType == "Recover":
         Thick = {"13cm":0.13, "15cm":0.15, "5cm":0.05, "10cm":0.1}[workItem["Thick"]]
@@ -405,9 +406,9 @@ def calKernel(workItemType, workItem):
         Width = round(float(workItem["Width"]) / 100, 2)
         lineMark = workItem["lineMark"]
         lineMarkFormulas = workItem["lineMarkFormulas"]
-        
+
         remaingSoil_txt = ""        # 1.60 餘方自行處理
-        asphaltRemove407_txt = ""      # 1.407 瀝青混凝土面層刨除，刨除機1.2m寬，緊急搶修工程用，未含刨除料運費  
+        asphaltRemove407_txt = ""      # 1.407 瀝青混凝土面層刨除，刨除機1.2m寬，緊急搶修工程用，未含刨除料運費
         asphaltRemove90_txt = ""      # 1.90 瀝青混凝土面層刨除，厚5cm，刨除機1.2m寬，未含運費
         asphaltRemove93_txt = ""      # 1.93 瀝青混凝土面層刨除，厚10cm，刨除機1.2m寬，未含運費
         asphaltShipping147_txt = ""    # 1.47 瀝青混凝土面層刨除，刨除料運費
@@ -429,20 +430,20 @@ def calKernel(workItemType, workItem):
         asphalt118_txt = ""         # 1.18 開挖機
         asphalt11_txt = ""          # 1.1 操作手
 
-        if workItem["recoverType"] == "路面切割":            
+        if workItem["recoverType"] == "路面切割":
             if workItem["materialType"] == "樹脂混凝土":
                 lineMarkFirstRow = 2
                 remaingSoil_txt = f"{Length_Formula}*{Width}*{Thick}"
                 asphalt189_txt = f"{Length_Formula}*{Width}*{Thick}"
             elif workItem["materialType"] == "AC回填":
-                lineMarkFirstRow = 3  
+                lineMarkFirstRow = 3
                 remaingSoil_txt = f"{Length_Formula}*{Width}*{Thick}"
                 asphaltStickLayer71_txt = f"{Length_Formula}*{Width}"
                 asphaltGrass74_txt = f"{Length_Formula}*{Width}*{Thick}"
-                
-        elif workItem["recoverType"] == "道路銑鋪":            
+
+        elif workItem["recoverType"] == "道路銑鋪":
             recoverArea = eval(Length_Formula)
-            if workItem["caseType"] == "一般案":       
+            if workItem["caseType"] == "一般案":
                 lineMarkFirstRow = 7
                 if Thick == 0.05:
                     asphaltRemove90_txt = f"{Length_Formula}"
@@ -455,21 +456,21 @@ def calKernel(workItemType, workItem):
                     if Thick == 0.1:
                         lineMarkFirstRow = 8
                         asphaltGrass77_txt = f"({Length_Formula})*0.05"
-                elif workItem["materialType"] == "再生瀝青":  
+                elif workItem["materialType"] == "再生瀝青":
                     asphalt184_txt = f"({Length_Formula})*0.05"
                     if Thick == 0.1:
                         lineMarkFirstRow = 8
                         asphalt187_txt = f"({Length_Formula})*0.05"
-                elif workItem["materialType"] == "改質瀝青":  
+                elif workItem["materialType"] == "改質瀝青":
                     asphalt180_txt = f"{Length_Formula}*{Thick}"
-            
+
             elif workItem["caseType"] == "搶修案":
                 lineMarkFirstRow = 8
                 if recoverArea > 50:
                     asphaltRolling399_txt = "1"
                 else:
                     asphaltRolling398_txt = "1"
-                if Thick == 0.05:                    
+                if Thick == 0.05:
                     asphaltRemove407_txt = "1"
                     asphaltStickLayer71_txt = f"{Length_Formula}"
                 elif Thick == 0.1:
@@ -480,12 +481,12 @@ def calKernel(workItemType, workItem):
                     if Thick == 0.1:
                         lineMarkFirstRow = 9
                         asphaltRemove402_txt = f"({Length_Formula})*0.05"
-                elif workItem["materialType"] == "再生瀝青":  
+                elif workItem["materialType"] == "再生瀝青":
                     asphaltRemove405_txt = f"({Length_Formula})*0.05"
                     if Thick == 0.1:
                         lineMarkFirstRow = 9
                         asphaltRemove404_txt = f"({Length_Formula})*0.05"
-                elif workItem["materialType"] == "改質瀝青":  
+                elif workItem["materialType"] == "改質瀝青":
                     asphaltRemove406_txt = f"{Length_Formula}*{Thick}"
 
             asphaltShipping147_txt = f"({Length_Formula})*{Thick}"
@@ -498,7 +499,7 @@ def calKernel(workItemType, workItem):
                 asphalt11_txt = f"{val}"
 
         contractInx = ["1.60",  # 餘方自行處理
-                       "1.407",   # 瀝青混凝土面層刨除，刨除機1.2m寬，緊急搶修工程用，未含刨除料運費  
+                       "1.407",   # 瀝青混凝土面層刨除，刨除機1.2m寬，緊急搶修工程用，未含刨除料運費
                        "1.90",  # 瀝青混凝土面層刨除，厚5cm，刨除機1.2m寬，未含運費
                        "1.93",  # 瀝青混凝土面層刨除，厚10cm，刨除機1.2m寬，未含運費
 
@@ -506,7 +507,7 @@ def calKernel(workItemType, workItem):
                        "1.398",  # 瀝青混凝土舖面，舖築及滾壓，緊急搶修工程用，鋪設面積≦50m2適用
                        "1.399",  # 瀝青混凝土舖面，舖築及滾壓，緊急搶修工程用，鋪設面積≦50m2適用
                        "1.71",  # 瀝青黏層，快凝油溶瀝青，RC-70
-                       
+
                        "1.403",  # 瀝青混凝土舖面，粗粒料9.5mm，針入度60~70，緊急搶修工程用，舖築及滾壓另計
                        "1.402",  # 瀝青混凝土舖面，粗粒料19.0mm，針入度60~70，緊急搶修工程用，舖築及滾壓另計
                        "1.405",  # 瀝青混凝土面，再生粒料，粗粒料9.5mm，緊急搶修工程用，舖築及滾壓另計
@@ -517,29 +518,29 @@ def calKernel(workItemType, workItem):
                        "1.77",  # 瀝青混凝土舖面，粗粒料19.0mm，黏度AC(1)-20，零星工程用
                        "1.84",  # 再生瀝青混凝土鋪面，(密級配，30%回收料)，粗粒料9.5mm，零星工程用
                        "1.87",  # 再生瀝青混凝土鋪面，(密級配，30%回收料)，粗粒料19.0mm，零星工程用
-                       "1.80",  # 密級配改質瀝青混凝土，粗粒料19mm，改質Ⅲ型，零星工程用                       
+                       "1.80",  # 密級配改質瀝青混凝土，粗粒料19mm，改質Ⅲ型，零星工程用
                        "1.89",  # 瀝青混凝土路面，樹脂混凝土，路面修補
-                       
+
                        "1.379", # 搬運費，AC施工機械(面積2000m2以下適用)
                        "1.18",  # 開挖機，0.70-0.79m3
-                       "1.1",   # 操作手，重機械  
+                       "1.1",   # 操作手，重機械
                        ]
-        itemTxtList = [remaingSoil_txt, asphaltRemove407_txt, asphaltRemove90_txt, asphaltRemove93_txt, 
-                       asphaltShipping147_txt, asphaltRolling398_txt, asphaltRolling399_txt, asphaltStickLayer71_txt, 
+        itemTxtList = [remaingSoil_txt, asphaltRemove407_txt, asphaltRemove90_txt, asphaltRemove93_txt,
+                       asphaltShipping147_txt, asphaltRolling398_txt, asphaltRolling399_txt, asphaltStickLayer71_txt,
                        asphaltRemove403_txt, asphaltRemove402_txt, asphaltRemove405_txt, asphaltRemove404_txt, asphaltRemove406_txt,
                        asphaltGrass74_txt, asphaltGrass77_txt, asphalt184_txt, asphalt187_txt, asphalt180_txt, asphalt189_txt,
-                       asphalt1379_txt, asphalt118_txt, asphalt11_txt] 
+                       asphalt1379_txt, asphalt118_txt, asphalt11_txt]
 
         contractInx = [contractInx[inx] for inx, item in enumerate(itemTxtList) if item]
         itemValList = [round(eval(item)+1e-12,3) for item in itemTxtList if item]
         itemTxtList = [item for item in itemTxtList if item]
-        
+
         rowCount = len(contractInx)
         lineMarkFormulasSum = 0
         if lineMark and len(lineMark) > 0:
             contractInx.append("1.448")
-            rowCount = len(contractInx) + len(lineMark)-1  
-            lineMarkFormulasSum = "+".join(lineMarkFormulas) 
+            rowCount = len(contractInx) + len(lineMark)-1
+            lineMarkFormulasSum = "+".join(lineMarkFormulas)
             firstRow = "+"
             if len(lineMark) == 1:
                 firstRow = ""
@@ -565,18 +566,18 @@ def calKernel(workItemType, workItem):
                 calDetail.append(["", workItem['colorCover'], "", "", ""])
 
     ## 其他
-    elif workItemType == "Others":       
-        # inx = ['1.1', '1.3', '1.4', '1.11', '1.16', 
-        #         '1.19', "1.97", '1.333', '1.335', '1.364', 
-        #         '1.366', '1.387', '1.396', '1.421', '1.429', 
+    elif workItemType == "Others":
+        # inx = ['1.1', '1.3', '1.4', '1.11', '1.16',
+        #         '1.19', "1.97", '1.333', '1.335', '1.364',
+        #         '1.366', '1.387', '1.396', '1.421', '1.429',
         #         '1.432', '1.433']
         # expectWorkingDay = int(workItem["expectWorkingDay"])
         for key in workItem.keys():
-            if key == "expectWorkingDay":
+            if key == "expectWorkingDay" or key == "workItemType":
                 continue
             else:
                 txt = f"{workItem[key]}"
-            
+
             ## replace "^" by "**"
             if "^" in txt:
                 txt.replace("^", "**")
@@ -589,7 +590,7 @@ def calKernel(workItemType, workItem):
             except:
                 txt = f"error at :{key}{contractData[key][0]}"
                 logger.info(txt)
-    
+
     return(calDetail)
 
 # 供 app 使用的別名
