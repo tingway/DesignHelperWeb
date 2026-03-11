@@ -3,19 +3,38 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DesignHelper Web - 通報單產生器</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #fadea2; font-family: "Microsoft JhengHei", sans-serif; }
-        /* for test #81e8f0, for local #fadea2  */
         .case-header { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 15px; }
-        /* 設定左右兩欄等高或滾動 */
-        .main-content { height: calc(100vh - 250px); overflow: hidden; }
-        .scroll-column { height: 100%; overflow-y: auto; padding-right: 5px; }
-        .card { border-radius: 10px; margin-bottom: 15px; }
-        .tab-content { padding: 15px; border: 1px solid #dee2e6; border-top: none; background: white; }
-        .table-sm { font-size: 0.85rem; }
-        .sticky-footer { background: #fff; padding: 10px; border-top: 1px solid #ddd; position: fixed; bottom: 0; width: 100%; left: 0; }
+        /* 修正：確保 tab-content 有白色背景與適當間距 */
+        .tab-content {
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-top: none;
+            background: white; /* 確保背景為白色 */
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+        /* 手機版預設：自動高度，取消固定高度 */
+        .main-content { height: auto; overflow: visible; padding-bottom: 80px; }
+        .scroll-column { height: auto; overflow: visible; }
+        /* 當螢幕寬度大於 768px (桌機) 時，才啟用固定高度滾動 */
+        @media (min-width: 768px) {
+            .main-content { height: calc(100vh - 250px); overflow: hidden; }
+            .scroll-column { height: 100%; overflow-y: auto; padding-right: 5px; }
+        }
+        /* 針對手機優化底部欄位 */
+        .sticky-footer {
+            background: #fff; padding: 10px; border-top: 1px solid #ddd;
+            position: fixed; bottom: 0; width: 100%; left: 0; z-index: 1000;
+        }
+        /* 手機上輸入框字體微調 */
+        @media (max-width: 767px) {
+            .form-control-sm, .form-select-sm { font-size: 16px !important; } /* 防止 iOS 自動縮放 */
+        }
     </style>
 </head>
 
@@ -24,11 +43,11 @@
 <div class="container-fluid px-4">
     <div class="case-header mt-3">
         <div class="row g-2">
-            <div class="col-md-1"><label class="form-label small">會勘日期</label><input type="date" class="form-control form-control-sm" id="surveyDate"></div>
-            <div class="col-md-1"><label class="form-label small">開工日期</label><input type="date" class="form-control form-control-sm" id="startDate"></div>
-            <div class="col-md-1"><label class="form-label small">繳交日期</label><input type="date" class="form-control form-control-sm" id="submitDay"></div>
-            <div class="col-md-1"><label class="form-label small">工期</label><input type="number" class="form-control form-control-sm" id="expectDate" value="7" placeholder="日曆天"></div>
-            <div class="col-md-1">
+            <div class="col-6 col-md-1"><label class="form-label small">會勘日期</label><input type="date" class="form-control form-control-sm" id="surveyDate"></div>
+            <div class="col-6 col-md-1"><label class="form-label small">開工日期</label><input type="date" class="form-control form-control-sm" id="startDate"></div>
+            <div class="col-6 col-md-1"><label class="form-label small">繳交日期</label><input type="date" class="form-control form-control-sm" id="submitDay"></div>
+            <div class="col-6 col-md-1"><label class="form-label small">工期</label><input type="number" class="form-control form-control-sm" id="expectDate" value="7" placeholder="日曆天"></div>
+            <div class="col-6 col-md-1">
                 <label class="form-label small">會勘人員</label>
                 <select class="form-select form-select-sm" id="surveyStaff">
                     <option value="經理">經理</option><option value="小左">小左</option><option value="煜璿">煜璿</option><option value="雅萱">雅萱</option><option value="阿嘎">阿嘎</option><option value="庭瑋">庭瑋</option>
@@ -36,21 +55,21 @@
             </div>
         </div>
         <div class="row g-2 mt-1">
-            <div class="col-md-1">
+            <div class="col-6 col-md-1">
                 <label class="form-label small">案件類型</label>
                 <select class="form-select form-select-sm" id="caseType">
                     <option value="搶修案">搶修案</option><option value="一般案">一般案</option>
                 </select>
             </div>
-            <div class="col-md-1">
+            <div class="col-6 col-md-1">
                 <label class="form-label small">行政區(合約類別)</label>
                 <select class="form-select form-select-sm" id="contractTxt">
                     <option value="北搶">北搶</option><option value="中松">中山松山</option><option value="士大">士林大同</option><option value="北投">北投</option><option value="全市搶">全市搶修</option>
                 </select>
             </div>
-            <div class="col-md-1"><label class="form-label small">通報編號</label><input type="text" class="form-control form-control-sm" id="noticeNo" placeholder="第幾次"></div>
-            <div class="col-md-4"><label class="form-label small">施工地點</label><input type="text" class="form-control form-control-sm" id="workingPosition"></div>
-            <div class="col-md-1">
+            <div class="col-6 col-md-1"><label class="form-label small">通報編號</label><input type="text" class="form-control form-control-sm" id="noticeNo" placeholder="第幾次"></div>
+            <div class="col-12 col-md-4"><label class="form-label small">施工地點</label><input type="text" class="form-control form-control-sm" id="workingPosition"></div>
+            <div class="col-6 col-md-1">
                 <label class="form-label small">地形圖編號</label>
                 <input type="text" class="form-control form-control-sm" id="mapNum" placeholder="N">
             </div>
@@ -346,6 +365,7 @@
         if (valEl) { valEl.disabled = !el.checked; el.addEventListener('change', function(){ document.getElementById(valId).disabled = !this.checked; }); }
     });
 
+    // 主要構造物工項建立邏輯
     function buildMainWorkItem() {
         const structureType = document.getElementById('m_structureType').value;
         const multipleNO = document.getElementById('m_multipleNO').value;
@@ -398,6 +418,7 @@
             workItemName: workItemName // 加入產出的工項名稱
         };
     }
+
     function buildCoverWorkItem() {
         // 1. 抓取 UI 欄位值 (請確保 ID 與您的 HTML 一致)
         const structureType = document.getElementById('c_structureType').value; // 例如: 側溝頂板
@@ -494,6 +515,7 @@
         return obj;
     }
 
+    // 根據選擇的 tab 產生對應的工項物件，並呼叫後端計算 API
     async function createWorkItem(tab) {
         let workItem;
         if (tab === 'main') workItem = buildMainWorkItem();
