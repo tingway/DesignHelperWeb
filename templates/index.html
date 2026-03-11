@@ -195,6 +195,41 @@
                         <div class="col-md-4"><label class="form-label small">切割寬度 cm</label><input type="number" class="form-control form-control-sm" id="r_Width" value="10"></div>
                         <div class="col-md-4"><label class="form-label small">色彩舖面 (算式)</label><input type="text" class="form-control form-control-sm" id="r_colorCover" placeholder="選填"></div>
                     </div>
+
+                    <div class="row g-2">
+                        <div class="col-md-12 border-top mt-2 pt-2">
+                            <label class="form-label small fw-bold">標線選擇</label>
+                            <div class="d-flex gap-2 mb-2">
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="openLineMarkModal()">
+                                    ➕ 選擇標線項目
+                                </button>
+                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="clearLineMarks()">
+                                    🗑️ 清除所有標線
+                                </button>
+                            </div>
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-light">
+                                    <tr><th size="150">項目</th><th>算式 (例如: 10*0.1)</th></tr>
+                                </thead>
+                                <tbody id="lineMarkTableBody">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="lineMarkModal" tabindex="-1">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header"><h5>選取標線工項</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                                <div class="modal-body">
+                                    <div class="row" id="lineMarkOptions">
+                                        </div>
+                                </div>
+                                <div class="modal-footer"><button type="button" class="btn btn-primary" onclick="confirmLineMarks()" data-bs-dismiss="modal">確認</button></div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="mt-3">
                         <button class="btn btn-primary w-100" onclick="createWorkItem('recover')">新增工項</button>
                     </div>
@@ -290,11 +325,20 @@
     let currentWorkItemType = null;
     let currentWorkItemPayload = null;
     let selectedRowIndex = -1;
+    let selectedLineMarks = [];
 
-    const OTHERS_IDS = { o_cuttingAC:'1.97', o_camera:'1.421', o_trafficCtrl:'1.429', o_supportLabor:'1.4', o_sectionalSteelFens:'1.432',
-                o_channelSteelFens:'1.433', o_sprinklerTruck:'1.11', o_truckDriver:'1.3', o_craneTruck:'1.16', o_wheelLoaderTruck:'1.19',
-                o_heavyMachineDriver:'1.1', o_emergencyRepair:'1.396', o_pump:'1.364', o_sandBag:'1.366', o_surveying:'1.421',
-                o_humanSteelPlate:'1.335', o_tempSteelPlate:'1.333', o_smallMachine:'1.387' };
+    const OTHERS_IDS = {
+        o_cuttingAC:'1.97', o_camera:'1.421', o_trafficCtrl:'1.429', o_supportLabor:'1.4',o_sectionalSteelFens:'1.432',
+        o_channelSteelFens:'1.433', o_sprinklerTruck:'1.11', o_truckDriver:'1.3', o_craneTruck:'1.16', o_wheelLoaderTruck:'1.19',
+        o_heavyMachineDriver:'1.1', o_emergencyRepair:'1.396', o_pump:'1.364', o_sandBag:'1.366', o_surveying:'1.421',
+        o_humanSteelPlate:'1.335', o_tempSteelPlate:'1.333', o_smallMachine:'1.387' };
+    const LINE_MARK_DEFAULTS = {
+        "紅線": "總長度*0.1", "黃線": "總長度*0.1", "白線": "總長度*0.1",
+        "行人穿越道線": "總長度*0.4", "待轉線": "總長度*0.2", "待轉圖案": "3",
+        "網狀線": "((長+寬)*2*0.2+長*寬*0.1/斜線間隔)", "慢、停標字": "2.5", "速限標字": "2.5",
+        "直行箭頭": "3", "弧形箭頭": "3", "2分岔箭頭": "5", "3分岔箭頭": "7",
+        "車道縮減標線": "5", "人行道標字+圖案": "2.5", "人行道標線": "總長度*(0.1+0.15)",
+        "專用車道標字": "每字2.5", "其他": "請參考規範"};
 
     document.querySelectorAll('#othersTab .form-check-input[type="checkbox"]').forEach(el => {
         const valId = el.id + '_val';
@@ -396,14 +440,23 @@
             workItemName: workItemName
         };
     }
+
     function buildRecoverWorkItem() {
         const recoverType = document.getElementById('r_recoverType').value;
         const materialType = document.getElementById('r_materialType').value;
         const width = document.getElementById('r_Width').value;
         const Thick = document.getElementById('r_Thick').value;
 
-        const recoverMaterialmap = { "AC回填":"採用AC回填", "樹脂混凝土":"採用樹脂混凝土", "RC混凝土":"採用RC回填",
-                                "一般瀝青":"採用一般瀝青", "再生瀝青":"採用再生瀝青", "改質瀝青":"採用改質III型" };
+        // 收集標線算式
+        const lineMarkFormulas = [];
+        document.querySelectorAll('.lm-formula').forEach(input => {
+            lineMarkFormulas.push(input.value.trim());
+        });
+
+        const recoverMaterialmap = {
+            "AC回填":"採用AC回填", "樹脂混凝土":"採用樹脂混凝土", "RC混凝土":"採用RC回填",
+            "一般瀝青":"採用一般瀝青", "再生瀝青":"採用再生瀝青", "改質瀝青":"採用改質III型"
+        };
         const recoverMaterial = recoverMaterialmap[materialType] || "採用AC回填";
 
         let workItemName = "";
@@ -422,11 +475,13 @@
             Width: width,
             Thick: Thick,
             Length: document.getElementById('r_Length').value,
-            lineMark: [],
-            lineMarkFormulas: [],
+            // 核心：將標線資訊存入
+            lineMark: selectedLineMarks,
+            lineMarkFormulas: lineMarkFormulas,
             colorCover: document.getElementById('r_colorCover').value.trim() || ""
         };
     }
+
     function buildOthersWorkItem() {
         const obj = { workItemType: "Others" };
         for (const [uiId, contractId] of Object.entries(OTHERS_IDS)) {
@@ -656,6 +711,42 @@
             })
             .catch(err => { console.error('downloadFinalJson error', err); alert('導出失敗: ' + (err && err.message ? err.message : err)); });
     }
+
+    // line mark related functions
+    function openLineMarkModal() {
+        const container = document.getElementById('lineMarkOptions');
+        container.innerHTML = Object.keys(LINE_MARK_DEFAULTS).map(name => `
+            <div class="col-md-4 mb-2">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="${name}" id="lm_${name}" ${selectedLineMarks.includes(name) ? 'checked' : ''}>
+                    <label class="form-check-label">${name}</label>
+                </div>
+            </div>
+        `).join('');
+        new bootstrap.Modal(document.getElementById('lineMarkModal')).show();
+    }
+
+    function confirmLineMarks() {
+        const checkboxes = document.querySelectorAll('#lineMarkOptions .form-check-input:checked');
+        selectedLineMarks = Array.from(checkboxes).map(cb => cb.value);
+        renderLineMarkTable();
+    }
+
+    function renderLineMarkTable() {
+        const tbody = document.getElementById('lineMarkTableBody');
+        tbody.innerHTML = selectedLineMarks.map((name, idx) => `
+            <tr>
+                <td>${name}</td>
+                <td><input type="text" class="form-control form-control-sm lm-formula" data-name="${name}" value="${LINE_MARK_DEFAULTS[name]}"></td>
+            </tr>
+        `).join('');
+    }
+
+    function clearLineMarks() {
+        selectedLineMarks = [];
+        renderLineMarkTable();
+    }
+
 </script>
 
 </body>
