@@ -140,7 +140,7 @@
                         </div>
                     </div>
                     <div class="mt-3">
-                        <button class="btn btn-primary w-100" onclick="calculateAPI('main')">加入工項並預覽</button>
+                        <button class="btn btn-primary w-100" onclick="createWorkItem('main')">新增工項</button>
                     </div>
                 </div>
 
@@ -171,7 +171,7 @@
                         </div>
                     </div>
                     <div class="mt-3">
-                        <button class="btn btn-primary w-100" onclick="calculateAPI('cover')">加入工項並預覽</button>
+                        <button class="btn btn-primary w-100" onclick="createWorkItem('cover')">新增工項</button>
                     </div>
                 </div>
 
@@ -196,7 +196,7 @@
                         <div class="col-md-4"><label class="form-label small">色彩舖面 (算式)</label><input type="text" class="form-control form-control-sm" id="r_colorCover" placeholder="選填"></div>
                     </div>
                     <div class="mt-3">
-                        <button class="btn btn-primary w-100" onclick="calculateAPI('recover')">加入工項並預覽</button>
+                        <button class="btn btn-primary w-100" onclick="createWorkItem('recover')">新增工項</button>
                     </div>
                 </div>
 
@@ -222,7 +222,7 @@
                         <div class="col-6 col-md-4"><div class="form-check" title="1.387"><input class="form-check-input" type="checkbox" id="o_smallMachine" checked><label class="form-check-label">臨時設施小型機具(次)</label></div><input type="text" class="form-control form-control-sm" id="o_smallMachine_val" value="1" disabled></div>
                     </div>
                     <div class="mt-3">
-                        <button class="btn btn-primary w-100" onclick="calculateAPI('others')">加入工項並預覽</button>
+                        <button class="btn btn-primary w-100" onclick="createWorkItem('others')">新增工項</button>
                     </div>
                 </div>
             </div>
@@ -231,7 +231,7 @@
         <div class="col-md-7 scroll-column">
             <div class="card shadow-sm mb-3">
                 <div class="card-header bg-secondary text-white py-1 d-flex justify-content-between align-items-center">
-                    <span>已暫存工項清單</span>
+                    <span>工項數量表</span>
                     <div class="btn-group btn-group-sm">
                         <button type="button" class="btn btn-light btn-sm" onclick="moveUpItem()">前移</button>
                         <button type="button" class="btn btn-light btn-sm" onclick="deleteSelectedItem()">刪除</button>
@@ -250,7 +250,7 @@
             </div>
 
             <div class="card shadow-sm">
-                <div class="card-header bg-info text-white py-1">計算明細 (預覽)</div>
+                <div class="card-header bg-info text-white py-1">數量計算明細</div>
                 <div class="card-body p-0">
                     <table class="table table-bordered table-sm mb-0">
                         <thead class="table-light">
@@ -439,7 +439,7 @@
         return obj;
     }
 
-    async function calculateAPI(tab) {
+    async function createWorkItem(tab) {
         let workItem;
         if (tab === 'main') workItem = buildMainWorkItem();
         else if (tab === 'cover') workItem = buildCoverWorkItem();
@@ -465,20 +465,14 @@
             `).join('');
 
             // automatically add work item after successful calculation
-            confirmAddItem();
+            addItemList();
         } else {
             alert('計算失敗：' + (result.message || ''));
         }
     }
 
-    function getFirstRowSummary() {
-        if (!currentPreviewData || currentPreviewData.length < 2) return { name: '工項', qty: '-', unit: '-' };
-        const row = currentPreviewData.find(r => r[0] && r[0] !== '');
-        return row ? { name: row[1], qty: row[3], unit: row[4] } : { name: '工項', qty: '-', unit: '-' };
-    }
-
-    function confirmAddItem() {
-        if (!currentPreviewData) { alert('請先按「加入工項並預覽」'); return; }
+    function addItemList() {
+        if (!currentPreviewData) { alert('請先按「新增工項」'); return; }
         // 1. 取得由 buildXXXXWorkItem 產生的 payload 資料
         const item = currentWorkItemPayload;
         // 2. 初始化名稱、數量、單位 (比照 PySide 邏輯)
@@ -520,7 +514,20 @@
                 <td>${item.name}</td>
                 <td>${item.qty}</td>
                 <td>${item.unit}</td>
-                <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteItemAt(${idx})">刪除</button></td>
+                <td><button type="button" class="btn btn-sm" onclick="showItems(${idx})">顯示</button></td>
+            </tr>
+        `).join('');
+    }
+
+    function showItems(idx) {
+        const tbody = document.getElementById('calcDetailBody');
+        tbody.innerHTML = workItemsList[idx].detailRows.map(row => `
+            <tr>
+                <td>${row[0]}</td>
+                <td style="${row[0]==='' ? 'color:gray; font-size:0.8rem;' : ''}">${row[1]}</td>
+                <td>${row[2]}</td>
+                <td>${row[3]}</td>
+                <td>${row[4]}</td>
             </tr>
         `).join('');
     }
