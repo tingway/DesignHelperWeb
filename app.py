@@ -38,11 +38,13 @@ def save_json():
         data = request.json
         # 這裡的 data 預期包含 { workItemsDict, caculateDataDict, caseData }
         # 比照 DesignHelper.py 的儲存格式
+        print(data)
         output_format = [
             data.get('workItemsDict', {}),
             data.get('caculateDataDict', {}),
             data.get('caseData', {})
         ]
+        print(output_format)
         json_str = json.dumps(output_format, ensure_ascii=False, indent=2)
         return jsonify({"status": "success", "json_str": json_str})
     except Exception as e:
@@ -52,3 +54,4 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
 
+# localhost:5000

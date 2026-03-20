@@ -7,7 +7,8 @@
     <title>DesignHelper Web - 通報單產生器</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #fadea2; font-family: "Microsoft JhengHei", sans-serif; }
+        body { background-color: #81e8f0; font-family: "Microsoft JhengHei", sans-serif; }
+        /* for online #fadea2, for local #81e8f0  */
         .case-header { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 15px; }
         /* 修正：確保 tab-content 有白色背景與適當間距 */
         .tab-content {
@@ -39,6 +40,14 @@
 </head>
 
 <body>
+<div id="passwordOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #81e8f0; z-index: 9999; display: flex; justify-content: center; align-items: center;">
+    <div class="card p-4 shadow" style="width: 300px;">
+        <h5 class="text-center mb-3">請輸入登入密碼</h5>
+        <input type="password" id="sitePassword" class="form-control mb-3" placeholder="密碼">
+        <button class="btn btn-primary w-100" onclick="checkPassword()">登入</button>
+        <div id="loginError" class="text-danger mt-2 small" style="display: none;">密碼錯誤，請重新輸入</div>
+    </div>
+</div>
 
 <div class="container-fluid px-4">
     <div class="case-header mt-3">
@@ -64,11 +73,22 @@
             <div class="col-6 col-md-1">
                 <label class="form-label small">行政區(合約類別)</label>
                 <select class="form-select form-select-sm" id="contractTxt">
-                    <option value="北搶">北搶</option><option value="中松">中山松山</option><option value="士大">士林大同</option><option value="北投">北投</option><option value="全市搶">全市搶修</option>
+                    <option value="114北搶">114北搶</option>
+                    <option value="114中松">114中松</option>
+                    <option value="114士大">114士大</option>
+                    <option value="114北投">114北投</option>
+                    <option value="114全市搶">114全市搶</option>
+                    <option value="115北投士林">115北投士林</option>
+                    <option value="115中山大同">115中山大同</option>
+                    <option value="115北區搶修">115北區搶修</option>
                 </select>
             </div>
-            <div class="col-6 col-md-1"><label class="form-label small">通報編號</label><input type="text" class="form-control form-control-sm" id="noticeNo" placeholder="第幾次"></div>
-            <div class="col-12 col-md-4"><label class="form-label small">施工地點</label><input type="text" class="form-control form-control-sm" id="workingPosition"></div>
+            <div class="col-6 col-md-1"><label class="form-label small">通報編號</label>
+                <input type="text" class="form-control form-control-sm" id="noticeNo" placeholder="第幾次"></div>
+            <div class="col-12 col-md-3"><label class="form-label small">施工地點</label>
+                <input type="text" class="form-control form-control-sm" id="workingPosition"></div>
+            <div class="col-12 col-md-1"><label class="form-label small">備註</label>
+                <input type="text" class="form-control form-control-sm" id="remarks"></div>
             <div class="col-6 col-md-1">
                 <label class="form-label small">地形圖編號</label>
                 <input type="text" class="form-control form-control-sm" id="mapNum" placeholder="N">
@@ -365,6 +385,30 @@
         if (valEl) { valEl.disabled = !el.checked; el.addEventListener('change', function(){ document.getElementById(valId).disabled = !this.checked; }); }
     });
 
+    // 設定您的密碼 (建議隨後自行修改)
+    const ACCESS_PASSWORD = "24970580";
+
+    function checkPassword() {
+        const input = document.getElementById('sitePassword').value;
+        const overlay = document.getElementById('passwordOverlay');
+        const errorMsg = document.getElementById('loginError');
+
+        if (input === ACCESS_PASSWORD) {
+            overlay.style.display = 'none'; // 密碼正確，移除遮罩
+            // 可選：將登入狀態存在 sessionStorage，重新整理時不用再輸入
+            sessionStorage.setItem('isLoggedIn', 'true');
+        } else {
+            errorMsg.style.display = 'block';
+        }
+    }
+
+    // 頁面載入時檢查是否已登入
+    document.addEventListener('DOMContentLoaded', () => {
+        if (sessionStorage.getItem('isLoggedIn') === 'true') {
+            document.getElementById('passwordOverlay').style.display = 'none';
+        }
+    });
+
     // 主要構造物工項建立邏輯
     function buildMainWorkItem() {
         const structureType = document.getElementById('m_structureType').value;
@@ -647,6 +691,7 @@
                     submitDay: (document.getElementById('submitDay') || {}).value || '',
                     caseType: (document.getElementById('caseType') || {}).value || '',
                     workingPosition: (document.getElementById('workingPosition') || {}).value || '',
+                    remarks: (document.getElementById('remarks') || {}).value || '',
                     noticeNo: (document.getElementById('noticeNo') || {}).value || '',
                     surveyStaff: (document.getElementById('surveyStaff') || {}).value || '',
                     contractTxt: (document.getElementById('contractTxt') || {}).value || '',
@@ -675,6 +720,7 @@
                 if (h.submitDay) document.getElementById('submitDay').value = h.submitDay;
                 if (h.caseType) document.getElementById('caseType').value = h.caseType;
                 if (h.workingPosition !== undefined) document.getElementById('workingPosition').value = h.workingPosition;
+                if (h.remarks !== undefined) document.getElementById('remarks').value = h.remarks;
                 if (h.noticeNo !== undefined) document.getElementById('noticeNo').value = h.noticeNo;
                 if (h.surveyStaff !== undefined) document.getElementById('surveyStaff').value = h.surveyStaff;
                 if (h.contractTxt) document.getElementById('contractTxt').value = h.contractTxt;
@@ -689,14 +735,19 @@
         } catch (e) { alert('匯入失敗'); }
     }
 
-    function getCaseData() {
+    function getCaseData() {// 獲取主地址與備註
+        const mainPos = document.getElementById('workingPosition').value;
+        const note = document.getElementById('remarks').value;
+
+        // 合併內容：如果備註有值，用括號括起來加在後面
+        const fullPosition = note ? `${mainPos}(${note})` : mainPos;
         return {
             surveyDate: document.getElementById('surveyDate').value,
             startDate: document.getElementById('startDate').value,
             submitDay: document.getElementById('submitDay').value,
             expectDate: document.getElementById('expectDate').value,
             caseType: document.getElementById('caseType').value,
-            workingPosition: document.getElementById('workingPosition').value,
+            workingPosition: fullPosition,
             noticeNo: document.getElementById('noticeNo').value,
             surveyStaff: document.getElementById('surveyStaff').value,
             contractTxt: document.getElementById('contractTxt').value,

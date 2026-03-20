@@ -591,6 +591,7 @@ def calKernel(workItemType, workItem):
                 txt = f"error at :{key}{contractData[key][0]}"
                 logger.info(txt)
 
+    print(calDetail)
     return(calDetail)
 
 # 供 app 使用的別名
