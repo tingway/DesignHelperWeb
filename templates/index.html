@@ -335,6 +335,33 @@
                     </table>
                 </div>
             </div>
+
+            <div class="card shadow-sm mt-3">
+                <div class="card-header bg-dark text-white py-1 d-flex justify-content-between align-items-center">
+                    <span>現場手繪筆記</span>
+                    <div class="btn-group">
+                        <button class="btn btn-light btn-sm py-0" onclick="document.getElementById('imgLoader').click()">📷 匯入圖檔</button>
+                        <button class="btn btn-light btn-sm py-0" onclick="downloadCanvas()">💾 下載圖檔</button>
+                        <button class="btn btn-danger btn-sm py-0" onclick="clearCanvas()">清空</button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="p-2 bg-light border-bottom d-flex gap-2 align-items-center">
+                        <input type="file" id="imgLoader" accept="image/*" style="display:none;" onchange="handleImage(this)">
+                        <label class="small fw-bold">顏色:</label>
+                        <input type="color" id="penColor" value="#ff0000" class="form-control-sm border-0" style="width:30px;height:30px;padding:0;cursor:pointer;">
+                        <label class="small fw-bold">粗細:</label>
+                        <select id="penWidth" class="form-select form-select-sm" style="width:auto;">
+                            <option value="2">細</option>
+                            <option value="5" selected>中</option>
+                            <option value="10">粗</option>
+                        </select>
+                    </div>
+                    <div id="canvasWrapper" style="width:100%; touch-action:none; background:#ffffff;">
+                        <canvas id="sketchPad" style="display: block;"></canvas>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <div class="sticky-footer d-flex justify-content-between align-items-center shadow-sm px-4">
@@ -365,6 +392,7 @@
     let currentWorkItemPayload = null;
     let selectedRowIndex = -1;
     let selectedLineMarks = [];
+    let canvas, ctx, drawing = false;
 
     const OTHERS_IDS = {
         o_cuttingAC:'1.97', o_camera:'1.421', o_trafficCtrl:'1.429', o_supportLabor:'1.4',o_sectionalSteelFens:'1.432',
@@ -407,6 +435,11 @@
         if (sessionStorage.getItem('isLoggedIn') === 'true') {
             document.getElementById('passwordOverlay').style.display = 'none';
         }
+    });
+
+    // 頁面載入完成後初始化畫布
+    document.addEventListener('DOMContentLoaded', () => {
+        initCanvas();
     });
 
     // 主要構造物工項建立邏輯
@@ -818,6 +851,90 @@
     function clearLineMarks() {
         selectedLineMarks = [];
         renderLineMarkTable();
+    }
+
+    // 畫布相關函式
+    function initCanvas() {
+        canvas = document.getElementById('sketchPad');
+        ctx = canvas.getContext('2d');
+        const wrapper = document.getElementById('canvasWrapper');
+
+        // 設定畫布寬度為容器寬度，高度固定為 400px
+        canvas.width = wrapper.offsetWidth;
+        canvas.height = 400;
+
+        // 初始化背景為白色 (重要：否則下載會變成透明底)
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 滑鼠事件
+        canvas.onmousedown = (e) => startDraw(e.offsetX, e.offsetY);
+        canvas.onmousemove = (e) => drawing && draw(e.offsetX, e.offsetY);
+        canvas.onmouseup = () => drawing = false;
+        canvas.onmouseleave = () => drawing = false;
+
+        // 手機觸控事件 (支援壓力感應與防止螢幕捲動)
+        canvas.ontouchstart = (e) => {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            startDraw(touch.clientX - rect.left, touch.clientY - rect.top);
+        };
+        canvas.ontouchmove = (e) => {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            draw(touch.clientX - rect.left, touch.clientY - rect.top);
+        };
+        canvas.ontouchend = () => drawing = false;
+    }
+
+    function startDraw(x, y) {
+        drawing = true;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+    }
+
+    function draw(x, y) {
+        if (!drawing) return;
+        ctx.lineTo(x, y);
+        ctx.strokeStyle = document.getElementById('penColor').value;
+        ctx.lineWidth = document.getElementById('penWidth').value;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round'; // 讓線條轉折處更平滑
+        ctx.stroke();
+    }
+
+    function clearCanvas() {
+        if (confirm("確定要清空畫布嗎？")) {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+    }
+
+    function handleImage(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    // 自動調整畫布高度以符合圖片比例
+                    const ratio = img.height / img.width;
+                    canvas.height = canvas.width * ratio;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                }
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function downloadCanvas() {
+        const link = document.createElement('a');
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        link.download = `現場手繪_${timestamp}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
     }
 
 </script>
